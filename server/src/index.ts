@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import { routesDebug } from './routes/debug.js'
 import { routesSante } from './routes/sante.js'
 
 const port = Number(process.env.SERVER_PORT ?? 3001)
@@ -10,6 +11,7 @@ const app = Fastify({
 })
 
 await app.register(routesSante)
+await app.register(routesDebug)
 
 try {
   await app.listen({ port, host: '0.0.0.0' })

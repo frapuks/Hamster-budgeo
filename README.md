@@ -9,6 +9,8 @@ Spec : [docs/brainstorm-produit.md](docs/brainstorm-produit.md) — plan : [docs
 cp .env.example .env      # déjà fait
 npm install
 npm run db:up             # Postgres dans Docker, port 5433 côté hôte
+npm run migrate           # applique les migrations SQL
+npm run seed              # charge le jeu de démonstration
 npm run dev               # serveur sur 3001, front sur 5173
 ```
 
@@ -21,6 +23,8 @@ Puis http://localhost:5173
 | `npm run dev` | Serveur Fastify + front Vite, en parallèle |
 | `npm run db:up` / `db:down` | Démarre / arrête PostgreSQL |
 | `npm run db:logs` | Journal du conteneur base |
+| `npm run migrate` | Applique les migrations `server/migrations/*.sql` |
+| `npm run seed` | Recharge le jeu de démonstration (efface les données existantes) |
 | `npm run typecheck` | TypeScript sur les deux workspaces |
 | `npm test` | Vitest |
 
