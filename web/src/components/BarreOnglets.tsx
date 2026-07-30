@@ -24,11 +24,13 @@ export function BarreOnglets() {
       sx={{
         position: 'fixed',
         bottom: 0,
-        left: 0,
-        right: 0,
         // Même colonne mobile que le contenu, sinon la barre s'étire seule sur desktop.
-        maxWidth: LARGEUR_MOBILE,
-        mx: 'auto',
+        // Centrage par transformation : avec `left` et `right` définis plus un
+        // `max-width`, la boîte serait sur-contrainte et se collerait à gauche.
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: `${LARGEUR_MOBILE}px`,
         borderRadius: 0,
         backgroundColor: COULEURS.fondBarre,
         border: 'none',

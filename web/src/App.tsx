@@ -3,10 +3,12 @@ import { Route, Routes } from 'react-router-dom'
 import { BarreOnglets } from './components/BarreOnglets.js'
 import { Accueil } from './pages/Accueil.js'
 import { Budgets } from './pages/Budgets.js'
+import { Charges } from './pages/Charges.js'
+import { FormulaireCharge } from './pages/FormulaireCharge.js'
 import { DetailBudget } from './pages/DetailBudget.js'
 import { DetailCompte } from './pages/DetailCompte.js'
 import { Demo } from './pages/Demo.js'
-import { Charges, Reglages } from './pages/PagesVides.js'
+import { Reglages } from './pages/PagesVides.js'
 import { LARGEUR_MOBILE } from './theme.js'
 
 export function App() {
@@ -17,6 +19,10 @@ export function App() {
           <Route path="/" element={<Accueil />} />
           <Route path="/comptes/:id" element={<DetailCompte />} />
           <Route path="/charges" element={<Charges />} />
+          {/* `nouvelle` avant `:id` : sans cet ordre, la route paramétrée capterait
+              le mot et tenterait de charger une charge d'identifiant « nouvelle ». */}
+          <Route path="/charges/nouvelle" element={<FormulaireCharge />} />
+          <Route path="/charges/:id" element={<FormulaireCharge />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/budgets/:id" element={<DetailBudget />} />
           <Route path="/reglages" element={<Reglages />} />

@@ -1,4 +1,4 @@
-import type { EtatFoyer, Sante } from '@shared/types.js'
+import type { EtatFoyer, Sante, TypeCharge } from '@shared/types.js'
 
 /**
  * Tous les appels HTTP passent par ce module.
@@ -25,6 +25,16 @@ async function patch<T>(chemin: string, corps: unknown): Promise<T> {
     throw new Error(`${chemin} a répondu ${reponse.status}`)
   }
   return reponse.json() as Promise<T>
+}
+
+export interface SaisieCharge {
+  compteId: number
+  categorieId: number | null
+  nom: string
+  type: TypeCharge
+  /** Par mois si `mensuelle`, PAR AN si `annuelle`. */
+  montantCents: number
+  jourPrelevement: number | null
 }
 
 async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: unknown): Promise<T> {
@@ -63,4 +73,9 @@ export const api = {
     envoyer<EtatFoyer>('POST', `/api/budgets/${budgetId}/depenses`, depense),
 
   supprimerDepense: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/depenses/${id}`),
+
+  creerCharge: (saisie: SaisieCharge) => envoyer<EtatFoyer>('POST', '/api/charges', saisie),
+  modifierCharge: (id: number, saisie: SaisieCharge) =>
+    patch<EtatFoyer>(`/api/charges/${id}`, saisie),
+  supprimerCharge: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/charges/${id}`),
 }

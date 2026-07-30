@@ -369,10 +369,13 @@ export const theme = createTheme({
           paddingBottom: 'env(safe-area-inset-bottom)',
           // La feuille reste dans la colonne mobile même sur grand écran, sinon elle
           // s'étire sur toute la largeur alors que le contenu, lui, reste centré.
+          // Centrage par transformation : avec `left` et `right` à 0 plus un
+          // `max-width`, la feuille serait sur-contrainte et se collerait à gauche.
+          width: '100%',
           maxWidth: LARGEUR_MOBILE,
-          marginInline: 'auto',
-          left: 0,
-          right: 0,
+          left: '50%',
+          right: 'auto',
+          transform: 'translateX(-50%)',
         },
       },
     },
