@@ -4,7 +4,7 @@ import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import PieChartRoundedIcon from '@mui/icons-material/PieChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { COULEURS } from '../theme.js'
+import { COULEURS, LARGEUR_MOBILE } from '../theme.js'
 
 const ONGLETS = [
   { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
@@ -26,6 +26,9 @@ export function BarreOnglets() {
         bottom: 0,
         left: 0,
         right: 0,
+        // Même colonne mobile que le contenu, sinon la barre s'étire seule sur desktop.
+        maxWidth: LARGEUR_MOBILE,
+        mx: 'auto',
         borderRadius: 0,
         backgroundColor: COULEURS.fondBarre,
         border: 'none',

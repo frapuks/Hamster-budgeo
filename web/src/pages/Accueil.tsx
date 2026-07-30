@@ -5,6 +5,7 @@ import { formatDate, formatEuros } from '@shared/format.js'
 import { CarteCompte } from '../components/CarteCompte.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { useEtat } from '../hooks/useEtat.js'
+import { proportionRestante } from '../proportions.js'
 
 function EnTeteSection({ titre, action }: { titre: string; action?: string }) {
   return (
@@ -39,8 +40,7 @@ export function Accueil() {
   }
 
   const { totaux, comptes, foyer } = etat
-  const progression =
-    totaux.totalDuCycleCents > 0 ? (totaux.dejaPreleveCents / totaux.totalDuCycleCents) * 100 : 0
+  const progression = proportionRestante(totaux.resteASortirCents, totaux.totalDuCycleCents)
 
   const budgets = comptes.flatMap((c) => c.budgets)
 

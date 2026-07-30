@@ -27,6 +27,30 @@ async function patch<T>(chemin: string, corps: unknown): Promise<T> {
   return reponse.json() as Promise<T>
 }
 
+async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: unknown): Promise<T> {
+  const reponse = await fetch(chemin, {
+    method: methode,
+    ...(corps === undefined
+      ? {}
+      : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) }),
+  })
+  if (!reponse.ok) {
+    throw new Error(`${chemin} a répondu ${reponse.status}`)
+  }
+  return reponse.json() as Promise<T>
+}
+
+/**
+ * Une dépense n'est pas attribuée à une personne : dans un foyer où tout est commun,
+ * savoir qui a sorti la carte n'apporte rien à la question posée par l'application —
+ * « combien reste-t-il à dépenser ? ». La colonne existe encore en base, inutilisée.
+ */
+export interface NouvelleDepense {
+  /** Facultatif : laissé vide, le serveur reprend le nom du budget. */
+  libelle?: string
+  montantCents: number
+}
+
 export const api = {
   getSante: () => get<Sante>('/api/health'),
   getEtat: () => get<EtatFoyer>('/api/etat'),
@@ -34,4 +58,9 @@ export const api = {
   /** Les mutations renvoient l'état complet : le cache est écrasé, jamais invalidé. */
   cocherCharge: (id: number, estPrelevee: boolean) =>
     patch<EtatFoyer>(`/api/charges/${id}/prelevee`, { estPrelevee }),
+
+  ajouterDepense: (budgetId: number, depense: NouvelleDepense) =>
+    envoyer<EtatFoyer>('POST', `/api/budgets/${budgetId}/depenses`, depense),
+
+  supprimerDepense: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/depenses/${id}`),
 }

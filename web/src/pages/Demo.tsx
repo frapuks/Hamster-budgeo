@@ -38,6 +38,7 @@ import { Carte, CarteBleue } from '../components/Carte.js'
 import { PuceStatut } from '../components/PuceStatut.js'
 import { PuceType, TYPES, type TypeElement } from '../components/PuceType.js'
 import { TuileCategorie, type CouleurCategorie } from '../components/TuileCategorie.js'
+import { proportionRestante } from '../proportions.js'
 import { COULEURS, RAYONS } from '../theme.js'
 
 // ── Briques réutilisables ────────────────────────────────────────────────────
@@ -150,7 +151,8 @@ export function Demo() {
         </Typography>
         <Typography variant="body2">restant à prélever ce cycle</Typography>
         <Box sx={{ display: 'grid', placeItems: 'center', mt: 2.5 }}>
-          <AnneauProgression pourcentage={14} valeur="14 %" legende="Déjà prélevé" />
+          {/* Comme partout : l'anneau montre ce qui reste, pas ce qui est consommé. */}
+          <AnneauProgression pourcentage={86} valeur="86 %" legende="Reste à sortir" />
         </Box>
       </Carte>
 
@@ -366,9 +368,10 @@ export function Demo() {
                     </Typography>
                   </Stack>
                 </Stack>
+                {/* Comme partout : la jauge montre ce qui reste, elle se vide. */}
                 <LinearProgress
                   variant="determinate"
-                  value={Math.min(100, (b.dep / b.total) * 100)}
+                  value={proportionRestante(restant, b.total)}
                   color={depasse ? 'error' : 'secondary'}
                 />
               </Carte>

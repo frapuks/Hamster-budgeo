@@ -6,13 +6,10 @@ function PageVide({ titre, lot }: { titre: string; lot: string }) {
       <Typography variant="h5" fontWeight={700}>
         {titre}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Écran prévu au {lot}.
-      </Typography>
+      <Typography variant="body2">Écran prévu au {lot}.</Typography>
     </Stack>
   )
 }
 
 export const Charges = () => <PageVide titre="Mes charges" lot="lot 7" />
-export const Budgets = () => <PageVide titre="Mes budgets" lot="lot 4" />
 export const Reglages = () => <PageVide titre="Réglages" lot="lot 10" />

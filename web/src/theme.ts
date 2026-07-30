@@ -46,6 +46,15 @@ export const COULEURS = {
  * de `theme.shape.borderRadius`. On n'écrit donc jamais de nombre : toujours un jeton
  * `RAYONS.x` ou une chaîne en `px`.
  */
+/**
+ * Largeur maximale de l'application, en pixels.
+ *
+ * L'app est pensée pour le téléphone : sur un écran large elle reste dans cette
+ * colonne centrée plutôt que de s'étirer. Une checklist de 1 400 px de large serait
+ * illisible, et les maquettes ne vaudraient plus rien.
+ */
+export const LARGEUR_MOBILE = 460
+
 export const RAYONS = {
   /** Cartes et surfaces principales. */
   carte: 16,
@@ -358,6 +367,12 @@ export const theme = createTheme({
           backgroundColor: SURFACE,
           backgroundImage: 'none',
           paddingBottom: 'env(safe-area-inset-bottom)',
+          // La feuille reste dans la colonne mobile même sur grand écran, sinon elle
+          // s'étire sur toute la largeur alors que le contenu, lui, reste centré.
+          maxWidth: LARGEUR_MOBILE,
+          marginInline: 'auto',
+          left: 0,
+          right: 0,
         },
       },
     },

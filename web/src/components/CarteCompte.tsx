@@ -2,6 +2,7 @@ import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { formatEuros } from '@shared/format.js'
 import type { CompteCalcule } from '@shared/types.js'
+import { proportionRestante } from '../proportions.js'
 import { COULEURS_CATEGORIE, type CouleurCategorie } from './TuileCategorie.js'
 import { Carte } from './Carte.js'
 
@@ -38,10 +39,7 @@ function chiffreDuCompte(compte: CompteCalcule): { montantCents: number; legende
 
 export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClick?: () => void }) {
   const { montantCents, legende } = chiffreDuCompte(compte)
-  const progression =
-    compte.totalDuCycleCents > 0
-      ? (compte.dejaPreleveCents / compte.totalDuCycleCents) * 100
-      : 0
+  const progression = proportionRestante(compte.resteASortirCents, compte.totalDuCycleCents)
 
   const pastille =
     COULEURS_CATEGORIE[(compte.couleur as CouleurCategorie) in COULEURS_CATEGORIE

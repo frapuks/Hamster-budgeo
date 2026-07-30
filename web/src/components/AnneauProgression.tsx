@@ -4,10 +4,13 @@ import { COULEURS } from '../theme.js'
 /**
  * Anneau de progression avec valeur au centre.
  *
- * Servira à « x % déjà prélevé » sur un compte et au reste à dépenser d'un budget.
- * Écrit en SVG plutôt qu'avec CircularProgress : on maîtrise l'épaisseur du trait,
- * les extrémités arrondies et le point de départ (12 h), ce que MUI ne permet pas
- * proprement.
+ * Convention de l'application : `pourcentage` est toujours **ce qui reste**, jamais ce
+ * qui est consommé. L'anneau part donc plein et se vide, ce qui met en image le chiffre
+ * affiché au centre — un anneau qui se remplirait pendant que le montant central
+ * diminue enverrait deux signaux contraires.
+ *
+ * Écrit en SVG plutôt qu'avec CircularProgress : on maîtrise l'épaisseur du trait, les
+ * extrémités arrondies et le point de départ (12 h), ce que MUI ne permet pas proprement.
  */
 export function AnneauProgression({
   pourcentage,

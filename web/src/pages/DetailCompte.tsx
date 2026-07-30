@@ -18,6 +18,7 @@ import { LigneBudget } from '../components/LigneBudget.js'
 import { LigneCharge } from '../components/LigneCharge.js'
 import { useCocherCharge } from '../hooks/useCocherCharge.js'
 import { useEtat } from '../hooks/useEtat.js'
+import { proportionRestante } from '../proportions.js'
 
 /** Le chiffre héros dépend du rôle, comme sur les cartes de l'accueil. */
 function heros(compte: CompteCalcule): { libelle: string; montantCents: number } {
@@ -57,8 +58,7 @@ export function DetailCompte() {
   const mensuelles = compte.charges.filter((c) => c.type === 'mensuelle')
   const annuelles = compte.charges.filter((c) => c.type === 'annuelle')
   const cochees = mensuelles.filter((c) => c.estPrelevee).length
-  const progression =
-    compte.totalDuCycleCents > 0 ? (compte.dejaPreleveCents / compte.totalDuCycleCents) * 100 : 0
+  const progression = proportionRestante(compte.resteASortirCents, compte.totalDuCycleCents)
 
   return (
     <Stack spacing={3} sx={{ pb: 2 }}>

@@ -2,15 +2,16 @@ import { Box, LinearProgress, Stack, Typography } from '@mui/material'
 import { formatEuros } from '@shared/format.js'
 import type { BudgetCalcule } from '@shared/types.js'
 import { couleurDe, iconeDe } from '../icones.js'
+import { proportionRestante } from '../proportions.js'
 import { TuileCategorie } from './TuileCategorie.js'
 import { Carte } from './Carte.js'
 
 export function LigneBudget({ budget, onClick }: { budget: BudgetCalcule; onClick?: () => void }) {
   const depasse = budget.resteADepenserCents < 0
-  const proportion =
-    budget.montantMensuelCents > 0
-      ? Math.min(100, (budget.depenseCents / budget.montantMensuelCents) * 100)
-      : 0
+  const proportion = proportionRestante(
+    budget.resteADepenserCents,
+    budget.montantMensuelCents,
+  )
 
   return (
     <Carte onClick={onClick} sx={{ p: 1.75, cursor: onClick ? 'pointer' : 'default' }}>
@@ -38,6 +39,11 @@ export function LigneBudget({ budget, onClick }: { budget: BudgetCalcule; onClic
           <Typography variant="body2" sx={{ fontSize: '0.6875rem' }}>
             {depasse ? 'dépassement' : 'restants'}
           </Typography>
+          {budget.depenses.length > 0 && (
+            <Typography variant="body2" sx={{ fontSize: '0.6875rem' }}>
+              {budget.depenses.length} dépense{budget.depenses.length > 1 ? 's' : ''}
+            </Typography>
+          )}
         </Stack>
       </Stack>
       <LinearProgress
