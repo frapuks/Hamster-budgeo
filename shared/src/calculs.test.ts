@@ -7,6 +7,7 @@ import {
   repartir,
   resteADepenser,
   resteASortir,
+  totalAnnuel,
   totalDuCycle,
   virementPermanent,
 } from './calculs.js'
@@ -122,17 +123,38 @@ describe('agrégats de charges', () => {
   })
 })
 
-describe('provisionMensuelle', () => {
-  it('reproduit le compte épargne de la spec', () => {
-    const provisions = [
-      charge({ nom: 'Eau', type: 'annuelle', montantCents: 60000, jourPrelevement: null }),
-      charge({ nom: 'Ordures', type: 'annuelle', montantCents: 30000, jourPrelevement: null }),
-      charge({ nom: 'Voiture', type: 'annuelle', montantCents: 45000, jourPrelevement: null }),
-      charge({ nom: 'Ramonage', type: 'annuelle', montantCents: 12000, jourPrelevement: null }),
-    ]
+describe('compte de provisions', () => {
+  const provisions = [
+    charge({ nom: 'Eau', type: 'annuelle', montantCents: 60000, jourPrelevement: null }),
+    charge({ nom: 'Ordures', type: 'annuelle', montantCents: 30000, jourPrelevement: null }),
+    charge({ nom: 'Voiture', type: 'annuelle', montantCents: 45000, jourPrelevement: null }),
+    charge({ nom: 'Ramonage', type: 'annuelle', montantCents: 12000, jourPrelevement: null }),
+  ]
+
+  it('reproduit le virement mensuel de la spec', () => {
     expect(provisionMensuelle(provisions)).toBe(12250)
-    // 1 470,00 € de charges dans l'année.
-    expect(provisions.reduce((s, c) => s + c.montantCents, 0)).toBe(147000)
+  })
+
+  it('reproduit le total annuel couvert', () => {
+    expect(totalAnnuel(provisions)).toBe(147000)
+  })
+
+  it('boucle : le virement mensuel × 12 couvre bien le total annuel', () => {
+    expect(provisionMensuelle(provisions) * 12).toBe(totalAnnuel(provisions))
+  })
+
+  it('ignore les charges mensuelles du même compte', () => {
+    const melange = [...provisions, charge({ type: 'mensuelle', montantCents: 5000 })]
+    expect(provisionMensuelle(melange)).toBe(12250)
+    expect(totalAnnuel(melange)).toBe(147000)
+  })
+
+  it("laisse un écart quand les montants ne sont pas divisibles par douze", () => {
+    // 250 €/an → 20,83 €/mois → 249,96 € sur l'année. L'écart est assumé : le combler
+    // produirait un virement permanent qui changerait de quelques centimes chaque mois.
+    const irregulier = [charge({ type: 'annuelle', montantCents: 25000 })]
+    expect(provisionMensuelle(irregulier) * 12).toBe(24996)
+    expect(totalAnnuel(irregulier)).toBe(25000)
   })
 })
 

@@ -63,6 +63,20 @@ export function provisionMensuelle(charges: Charge[]): number {
     .reduce((s, c) => s + coutMensuelLisse(c), 0)
 }
 
+/**
+ * Montant total des charges annuelles sur douze mois.
+ *
+ * C'est le seul endroit de l'application où l'on additionne des `montantCents` sans
+ * lissage — et c'est légitime, puisqu'on ne somme que des charges annuelles, toutes
+ * exprimées dans la même unité. Répond à « combien cette réserve couvre-t-elle dans
+ * l'année ? », alors que provisionMensuelle() répond à « combien virer ce mois-ci ? ».
+ */
+export function totalAnnuel(charges: Charge[]): number {
+  return charges
+    .filter((c) => c.actif && c.type === 'annuelle')
+    .reduce((s, c) => s + c.montantCents, 0)
+}
+
 // ── Budgets ──────────────────────────────────────────────────────────────────
 
 export function totalDepense(budget: Budget): number {
