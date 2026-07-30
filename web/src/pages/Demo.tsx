@@ -34,55 +34,16 @@ import WaterDropRoundedIcon from '@mui/icons-material/WaterDropRounded'
 import WifiRoundedIcon from '@mui/icons-material/WifiRounded'
 import { formatEuros } from '@shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
+import { Carte, CarteBleue } from '../components/Carte.js'
 import { PuceStatut } from '../components/PuceStatut.js'
 import { PuceType, TYPES, type TypeElement } from '../components/PuceType.js'
 import { TuileCategorie, type CouleurCategorie } from '../components/TuileCategorie.js'
 import { COULEURS, RAYONS } from '../theme.js'
 
 // ── Briques réutilisables ────────────────────────────────────────────────────
-
-/** Surface standard : marine clair, liseré discret. */
-function Carte({
-  children,
-  sx = {},
-  onClick,
-}: {
-  children: React.ReactNode
-  sx?: object
-  onClick?: () => void
-}) {
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        backgroundColor: 'background.paper',
-        border: `1px solid ${COULEURS.lisere}`,
-        // Jamais de nombre : dans `sx`, un nombre multiplie theme.shape.borderRadius.
-        borderRadius: `${RAYONS.carte}px`,
-        p: 2.25,
-        ...sx,
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-/** Surface bleu plein : réservée à l'élément mis en avant d'une série. */
-function CarteBleue({ children, sx = {} }: { children: React.ReactNode; sx?: object }) {
-  return (
-    <Box
-      sx={{
-        backgroundColor: COULEURS.bleu,
-        borderRadius: `${RAYONS.carte}px`,
-        p: 2.25,
-        ...sx,
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
+// `Carte` et `CarteBleue` vivent maintenant dans components/Carte.tsx : la démo doit
+// utiliser exactement les mêmes composants que les écrans réels, sinon elle valide
+// une apparence que l'application n'a pas.
 
 function EnTeteSection({ titre, action }: { titre: string; action?: string }) {
   return (

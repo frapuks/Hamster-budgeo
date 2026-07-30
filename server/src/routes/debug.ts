@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import { dumperFoyer, foyerCourant } from '../db/dump.js'
+import { dumperFoyer } from '../db/dump.js'
+import { foyerCourant } from '../db/etat.js'
 
 /**
  * Routes de vérification manuelle. Non destinées à l'interface, et à retirer — ou à

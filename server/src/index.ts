@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import { routesDebug } from './routes/debug.js'
+import { routesEtat } from './routes/etat.js'
 import { routesSante } from './routes/sante.js'
 
 const port = Number(process.env.SERVER_PORT ?? 3001)
@@ -11,6 +12,7 @@ const app = Fastify({
 })
 
 await app.register(routesSante)
+await app.register(routesEtat)
 await app.register(routesDebug)
 
 try {

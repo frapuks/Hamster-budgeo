@@ -58,9 +58,3 @@ export async function dumperFoyer(foyerId: number) {
 
   return { foyer, personnes, categories, comptes, charges, budgets, depenses }
 }
-
-/** Identifiant du foyer courant. Codé en dur jusqu'au lot 11 (authentification). */
-export async function foyerCourant(): Promise<number | null> {
-  const [ligne] = await sql<{ id: number }[]>`SELECT id FROM foyer ORDER BY id LIMIT 1`
-  return ligne?.id ?? null
-}
