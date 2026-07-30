@@ -79,9 +79,17 @@ export function Accueil() {
             gap: 1.5,
             overflowX: 'auto',
             scrollSnapType: 'x mandatory',
-            // Les cartes affleurent les bords de l'écran plutôt que d'être coupées net.
+            // Les cartes débordent jusqu'aux bords plutôt que d'être coupées net.
             mx: -2,
             px: 2,
+            // Indispensable avec le débordement ci-dessus : sans lui, l'accroche aligne
+            // les cartes sur le bord de la zone de défilement en ignorant le padding,
+            // et la première vient se coller au bord de l'écran.
+            //
+            // ⚠️ En pixels explicites : `sx` ne convertit l'unité d'espacement que pour
+            // une liste connue de propriétés (margin, padding, gap…), dont
+            // `scroll-padding` ne fait pas partie. Un `2` y vaudrait 2 px, pas 16.
+            scrollPaddingInline: '16px',
             pb: 1,
             '&::-webkit-scrollbar': { display: 'none' },
           }}

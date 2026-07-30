@@ -11,7 +11,7 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { formatDate, formatEuros } from '@shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
 import { Carte } from '../components/Carte.js'
@@ -19,13 +19,14 @@ import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleDepense } from '../components/FeuilleDepense.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
+import { useRetour } from '../hooks/useRetour.js'
 import { useSupprimerDepense } from '../hooks/useDepenses.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { COULEURS } from '../theme.js'
 
 export function DetailBudget() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  const retour = useRetour('/budgets')
   const { data: etat, isPending, isError } = useEtat()
   const supprimer = useSupprimerDepense()
   const [saisieOuverte, setSaisieOuverte] = useState(false)
@@ -59,7 +60,7 @@ export function DetailBudget() {
     <Stack spacing={3} sx={{ pb: 2 }}>
       {/* En-tête ------------------------------------------------------------ */}
       <Stack direction="row" alignItems="center" spacing={1.5}>
-        <IconButton onClick={() => navigate('/budgets')} sx={{ ml: -1 }} aria-label="Retour">
+        <IconButton onClick={retour} sx={{ ml: -1 }} aria-label="Retour">
           <ArrowBackRoundedIcon />
         </IconButton>
         <TuileCategorie
