@@ -1,20 +1,8 @@
-import {
-  besoinDuCycle,
-  calculerBudget,
-  calculerCharge,
-  dejaPreleve,
-  provisionMensuelle,
-  repartir,
-  resteADepenser,
-  resteASortir,
-  totalDuCycle,
-  virementPermanent,
-} from '@shared/calculs.js'
+import { assemblerEtat } from '@shared/calculs.js'
 import type {
   Budget,
   Categorie,
   Charge,
-  CompteCalcule,
   Depense,
   EtatFoyer,
   ModeRepartition,
@@ -99,28 +87,8 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
     depenses: lignesDepenses.filter((d) => d.budgetId === b.id),
   }))
 
-  const comptesCalcules: CompteCalcule[] = comptes.map((compte) => {
-    const sesCharges = charges.filter((c) => c.compteId === compte.id)
-    const sesBudgets = budgets.filter((b) => b.compteId === compte.id)
-
-    return {
-      ...compte,
-      charges: sesCharges.map(calculerCharge),
-      budgets: sesBudgets.map(calculerBudget),
-      totalDuCycleCents: totalDuCycle(sesCharges),
-      dejaPreleveCents: dejaPreleve(sesCharges),
-      resteASortirCents: resteASortir(sesCharges),
-      resteADepenserCents: sesBudgets.reduce((s, b) => s + resteADepenser(b), 0),
-      besoinDuCycleCents: besoinDuCycle(sesCharges, sesBudgets),
-      virementPermanentCents: virementPermanent(sesCharges, sesBudgets),
-      provisionMensuelleCents: provisionMensuelle(sesCharges),
-    }
-  })
-
-  const somme = (f: (c: CompteCalcule) => number) => comptesCalcules.reduce((s, c) => s + f(c), 0)
-  const virementTotal = somme((c) => c.virementPermanentCents)
-
-  return {
+  // Toute l'agrégation vit dans shared/calculs.ts : ce module ne fait que lire.
+  return assemblerEtat({
     foyer: {
       id: foyer.id,
       nom: foyer.nom,
@@ -130,22 +98,12 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
     },
     personnes,
     categories,
-    comptes: comptesCalcules,
-    totaux: {
-      totalDuCycleCents: somme((c) => c.totalDuCycleCents),
-      dejaPreleveCents: somme((c) => c.dejaPreleveCents),
-      resteASortirCents: somme((c) => c.resteASortirCents),
-      virementPermanentCents: virementTotal,
-      budgeteCents: budgets.reduce((s, b) => s + b.montantMensuelCents, 0),
-      depenseCents: lignesDepenses.reduce((s, d) => s + d.montantCents, 0),
-      resteADepenserCents: somme((c) => c.resteADepenserCents),
-    },
-    repartition: {
-      mode: foyer.modeRepartition,
-      chargesCommunesCents: virementTotal,
-      parts: repartir(foyer.modeRepartition, personnes, virementTotal),
-    },
-  }
+    comptes: comptes.map((compte) => ({
+      ...compte,
+      charges: charges.filter((c) => c.compteId === compte.id),
+      budgets: budgets.filter((b) => b.compteId === compte.id),
+    })),
+  })
 }
 
 /**

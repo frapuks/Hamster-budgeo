@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import { routesCharges } from './routes/charges.js'
 import { routesDebug } from './routes/debug.js'
 import { routesEtat } from './routes/etat.js'
 import { routesSante } from './routes/sante.js'
@@ -13,6 +14,7 @@ const app = Fastify({
 
 await app.register(routesSante)
 await app.register(routesEtat)
+await app.register(routesCharges)
 await app.register(routesDebug)
 
 try {

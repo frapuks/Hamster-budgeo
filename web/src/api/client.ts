@@ -15,7 +15,23 @@ async function get<T>(chemin: string): Promise<T> {
   return reponse.json() as Promise<T>
 }
 
+async function patch<T>(chemin: string, corps: unknown): Promise<T> {
+  const reponse = await fetch(chemin, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(corps),
+  })
+  if (!reponse.ok) {
+    throw new Error(`${chemin} a répondu ${reponse.status}`)
+  }
+  return reponse.json() as Promise<T>
+}
+
 export const api = {
   getSante: () => get<Sante>('/api/health'),
   getEtat: () => get<EtatFoyer>('/api/etat'),
+
+  /** Les mutations renvoient l'état complet : le cache est écrasé, jamais invalidé. */
+  cocherCharge: (id: number, estPrelevee: boolean) =>
+    patch<EtatFoyer>(`/api/charges/${id}/prelevee`, { estPrelevee }),
 }

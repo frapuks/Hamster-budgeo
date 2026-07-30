@@ -1,11 +1,15 @@
 import type {
   Budget,
   BudgetCalcule,
+  Categorie,
   Charge,
   ChargeCalculee,
+  CompteCalcule,
+  EtatFoyer,
   ModeRepartition,
   PartRepartition,
   Personne,
+  RoleCompte,
 } from './types.js'
 
 /**
@@ -100,6 +104,77 @@ export function calculerBudget(budget: Budget): BudgetCalcule {
     ...budget,
     depenseCents: totalDepense(budget),
     resteADepenserCents: resteADepenser(budget),
+  }
+}
+
+// ── Assemblage de l'état complet ─────────────────────────────────────────────
+
+export interface CompteBrut {
+  id: number
+  nom: string
+  banque: string
+  role: RoleCompte
+  couleur: string
+  ordre: number
+  charges: Charge[]
+  budgets: Budget[]
+}
+
+/**
+ * Assemble l'état complet du foyer à partir des données brutes.
+ *
+ * Volontairement unique et partagée : le serveur l'appelle après ses requêtes SQL, et
+ * le front la rappelle pour ses mises à jour optimistes. Deux chemins d'agrégation
+ * distincts finiraient par diverger, et l'écart serait invisible — un compte afficherait
+ * un total juste, l'accueil un total faux.
+ */
+export function assemblerEtat(brut: {
+  foyer: EtatFoyer['foyer']
+  personnes: Personne[]
+  categories: Categorie[]
+  comptes: CompteBrut[]
+}): EtatFoyer {
+  const comptes: CompteCalcule[] = brut.comptes.map((compte) => ({
+    id: compte.id,
+    nom: compte.nom,
+    banque: compte.banque,
+    role: compte.role,
+    couleur: compte.couleur,
+    ordre: compte.ordre,
+    charges: compte.charges.map(calculerCharge),
+    budgets: compte.budgets.map(calculerBudget),
+    totalDuCycleCents: totalDuCycle(compte.charges),
+    dejaPreleveCents: dejaPreleve(compte.charges),
+    resteASortirCents: resteASortir(compte.charges),
+    resteADepenserCents: compte.budgets.reduce((s, b) => s + resteADepenser(b), 0),
+    besoinDuCycleCents: besoinDuCycle(compte.charges, compte.budgets),
+    virementPermanentCents: virementPermanent(compte.charges, compte.budgets),
+    provisionMensuelleCents: provisionMensuelle(compte.charges),
+  }))
+
+  const somme = (f: (c: CompteCalcule) => number) => comptes.reduce((s, c) => s + f(c), 0)
+  const virementTotal = somme((c) => c.virementPermanentCents)
+  const tousBudgets = brut.comptes.flatMap((c) => c.budgets)
+
+  return {
+    foyer: brut.foyer,
+    personnes: brut.personnes,
+    categories: brut.categories,
+    comptes,
+    totaux: {
+      totalDuCycleCents: somme((c) => c.totalDuCycleCents),
+      dejaPreleveCents: somme((c) => c.dejaPreleveCents),
+      resteASortirCents: somme((c) => c.resteASortirCents),
+      virementPermanentCents: virementTotal,
+      budgeteCents: tousBudgets.reduce((s, b) => s + b.montantMensuelCents, 0),
+      depenseCents: tousBudgets.reduce((s, b) => s + totalDepense(b), 0),
+      resteADepenserCents: somme((c) => c.resteADepenserCents),
+    },
+    repartition: {
+      mode: brut.foyer.modeRepartition,
+      chargesCommunesCents: virementTotal,
+      parts: repartir(brut.foyer.modeRepartition, brut.personnes, virementTotal),
+    },
   }
 }
 
