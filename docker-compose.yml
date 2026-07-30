@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hamsterbudgeo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hamster}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hamster}
+      POSTGRES_DB: ${POSTGRES_DB:-hamsterbudgeo}
+      TZ: Europe/Paris
+    ports:
+      # 5433 côté hôte pour ne pas entrer en conflit avec un PostgreSQL déjà installé
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - hamsterbudgeo-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hamster} -d ${POSTGRES_DB:-hamsterbudgeo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  hamsterbudgeo-data:
