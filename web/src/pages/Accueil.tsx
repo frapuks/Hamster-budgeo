@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Alert, Box, Chip, CircularProgress, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, Stack, Typography } from '@mui/material'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { formatEuros } from '@shared/format.js'
 
@@ -53,6 +54,10 @@ export function Accueil() {
           Rendu par <code>shared/format.ts</code>, depuis 125155 centimes.
         </Typography>
       </Box>
+
+      <Button component={Link} to="/demo" variant="outlined">
+        Voir la démonstration du thème
+      </Button>
     </Stack>
   )
 }

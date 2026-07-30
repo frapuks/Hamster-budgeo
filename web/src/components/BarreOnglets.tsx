@@ -4,6 +4,7 @@ import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import PieChartRoundedIcon from '@mui/icons-material/PieChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { COULEURS } from '../theme.js'
 
 const ONGLETS = [
   { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
@@ -26,7 +27,9 @@ export function BarreOnglets() {
         left: 0,
         right: 0,
         borderRadius: 0,
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        backgroundColor: COULEURS.fondBarre,
+        border: 'none',
+        borderTop: `1px solid ${COULEURS.lisere}`,
         paddingBottom: 'env(safe-area-inset-bottom)',
         zIndex: 10,
       }}

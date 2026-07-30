@@ -2,6 +2,7 @@ import { Box, Container } from '@mui/material'
 import { Route, Routes } from 'react-router-dom'
 import { BarreOnglets } from './components/BarreOnglets.js'
 import { Accueil } from './pages/Accueil.js'
+import { Demo } from './pages/Demo.js'
 import { Budgets, Charges, Reglages } from './pages/PagesVides.js'
 
 export function App() {
@@ -13,6 +14,7 @@ export function App() {
           <Route path="/charges" element={<Charges />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/reglages" element={<Reglages />} />
+          <Route path="/demo" element={<Demo />} />
         </Routes>
       </Container>
       <BarreOnglets />
