@@ -4,7 +4,8 @@ import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import PieChartRoundedIcon from '@mui/icons-material/PieChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { COULEURS, LARGEUR_MOBILE } from '../theme.js'
+import { COULEURS } from '../theme.js'
+import { CoucheFixe } from './CoucheFixe.js'
 
 const ONGLETS = [
   { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
@@ -16,39 +17,46 @@ const ONGLETS = [
 export function BarreOnglets() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const actif = ONGLETS.findIndex((o) => o.chemin === pathname)
+
+  // Un sous-écran (`/charges/4`) doit garder son onglet parent allumé : on retient
+  // l'onglet dont le chemin préfixe l'URL courante, le plus spécifique d'abord.
+  const actif = ONGLETS.reduce(
+    (meilleur, onglet, index) =>
+      pathname === onglet.chemin ||
+      (onglet.chemin !== '/' && pathname.startsWith(`${onglet.chemin}/`))
+        ? index
+        : meilleur,
+    0,
+  )
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        position: 'fixed',
-        bottom: 0,
-        // Même colonne mobile que le contenu, sinon la barre s'étire seule sur desktop.
-        // Centrage par transformation : avec `left` et `right` définis plus un
-        // `max-width`, la boîte serait sur-contrainte et se collerait à gauche.
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '100%',
-        maxWidth: `${LARGEUR_MOBILE}px`,
-        borderRadius: 0,
-        backgroundColor: COULEURS.fondBarre,
-        border: 'none',
-        borderTop: `1px solid ${COULEURS.lisere}`,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-        zIndex: 10,
-      }}
-    >
-      <BottomNavigation
-        showLabels
-        value={actif === -1 ? 0 : actif}
-        onChange={(_, index) => navigate(ONGLETS[index]!.chemin)}
-        sx={{ backgroundColor: 'transparent' }}
+    <CoucheFixe zIndex={10}>
+      <Paper
+        elevation={0}
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          pointerEvents: 'auto',
+          borderRadius: 0,
+          backgroundColor: COULEURS.fondBarre,
+          border: 'none',
+          borderTop: `1px solid ${COULEURS.lisere}`,
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
       >
-        {ONGLETS.map(({ chemin, libelle, Icone }) => (
-          <BottomNavigationAction key={chemin} label={libelle} icon={<Icone />} />
-        ))}
-      </BottomNavigation>
-    </Paper>
+        <BottomNavigation
+          showLabels
+          value={actif}
+          onChange={(_, index) => navigate(ONGLETS[index]!.chemin)}
+          sx={{ backgroundColor: 'transparent' }}
+        >
+          {ONGLETS.map(({ chemin, libelle, Icone }) => (
+            <BottomNavigationAction key={chemin} label={libelle} icon={<Icone />} />
+          ))}
+        </BottomNavigation>
+      </Paper>
+    </CoucheFixe>
   )
 }

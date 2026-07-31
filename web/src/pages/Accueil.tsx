@@ -1,8 +1,19 @@
-import { Alert, Box, Chip, LinearProgress, Skeleton, Stack, Typography } from '@mui/material'
+import { useState } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  LinearProgress,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@shared/format.js'
 import { CarteCompte } from '../components/CarteCompte.js'
+import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { proportionRestante } from '../proportions.js'
@@ -19,6 +30,7 @@ function EnTeteSection({ titre, action }: { titre: string; action?: string }) {
 export function Accueil() {
   const navigate = useNavigate()
   const { data: etat, isPending, isError, error } = useEtat()
+  const [cycleOuvert, setCycleOuvert] = useState(false)
 
   if (isPending) {
     return (
@@ -129,6 +141,22 @@ export function Accueil() {
           </Box>
         </Typography>
       </Box>
+
+      {/* Nouveau cycle — discret, parce qu'irréversible ----------------------- */}
+      <Button
+        variant="outlined"
+        fullWidth
+        startIcon={<AutorenewRoundedIcon />}
+        onClick={() => setCycleOuvert(true)}
+      >
+        Nouveau cycle — tout décocher
+      </Button>
+
+      <FeuilleNouveauCycle
+        ouverte={cycleOuvert}
+        onFermer={() => setCycleOuvert(false)}
+        etat={etat}
+      />
     </Stack>
   )
 }

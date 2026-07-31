@@ -38,11 +38,14 @@ export interface SaisieCharge {
 }
 
 async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: unknown): Promise<T> {
+  // Un POST part toujours avec un corps JSON, même vide : sans en-tête `Content-Type`,
+  // Fastify refuse la requête en 415 avant d'atteindre la route.
+  const avecCorps = methode === 'POST' || corps !== undefined
   const reponse = await fetch(chemin, {
     method: methode,
-    ...(corps === undefined
-      ? {}
-      : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) }),
+    ...(avecCorps
+      ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps ?? {}) }
+      : {}),
   })
   if (!reponse.ok) {
     throw new Error(`${chemin} a répondu ${reponse.status}`)
@@ -78,4 +81,6 @@ export const api = {
   modifierCharge: (id: number, saisie: SaisieCharge) =>
     patch<EtatFoyer>(`/api/charges/${id}`, saisie),
   supprimerCharge: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/charges/${id}`),
+
+  demarrerNouveauCycle: () => envoyer<EtatFoyer>('POST', '/api/cycle/reset'),
 }

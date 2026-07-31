@@ -369,13 +369,20 @@ export const theme = createTheme({
           paddingBottom: 'env(safe-area-inset-bottom)',
           // La feuille reste dans la colonne mobile même sur grand écran, sinon elle
           // s'étire sur toute la largeur alors que le contenu, lui, reste centré.
-          // Centrage par transformation : avec `left` et `right` à 0 plus un
-          // `max-width`, la feuille serait sur-contrainte et se collerait à gauche.
+          //
+          // ⚠️ Surtout pas de `transform` ici : l'animation d'ouverture du tiroir pose
+          // son propre `transform` en style en ligne, qui écrase le nôtre — il ne
+          // resterait que le `left`, et la feuille partirait de travers.
+          //
+          // Le trio largeur définie + `left`/`right` à 0 + marges `auto` centre sans
+          // transformation : les deux marges se partagent l'espace restant à parts
+          // égales. La largeur explicite est indispensable — sans elle, les marges
+          // `auto` tombent à zéro et la feuille se colle à gauche.
           width: '100%',
           maxWidth: LARGEUR_MOBILE,
-          left: '50%',
-          right: 'auto',
-          transform: 'translateX(-50%)',
+          left: 0,
+          right: 0,
+          marginInline: 'auto',
         },
       },
     },
