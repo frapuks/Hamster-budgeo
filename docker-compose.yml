@@ -25,10 +25,14 @@ services:
     # C'est ce qui rend le mot de passe par défaut acceptable — PostgreSQL n'est pas
     # exposé au réseau domestique. À changer tout de même si le Pi héberge autre chose.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hamster} -d ${POSTGRES_DB:-hamsterbudgeo}"]
-      interval: 10s
+      # `-h 127.0.0.1` est indispensable : sans hôte, `pg_isready` interroge la socket
+      # Unix, sur laquelle le serveur temporaire d'`initdb` répond déjà « prêt » alors
+      # qu'aucune connexion réseau n'est encore acceptée. Le conteneur serait déclaré
+      # sain trop tôt et l'application répondrait 500 pendant quelques secondes.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-hamster} -d ${POSTGRES_DB:-hamsterbudgeo}"]
+      interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
 
   app:
     build: .

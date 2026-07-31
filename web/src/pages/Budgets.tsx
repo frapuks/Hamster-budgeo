@@ -1,7 +1,7 @@
-import { Alert, Box, Divider, Skeleton, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Divider, Skeleton, Stack, Typography } from '@mui/material'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { useNavigate } from 'react-router-dom'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
-import { BoutonFlottant } from '../components/BoutonFlottant.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { useEtat } from '../hooks/useEtat.js'
 
@@ -42,7 +42,14 @@ export function Budgets() {
           Aucun budget pour l'instant. Un budget est une enveloppe mensuelle — courses,
           essence, restaurants — dont tu déduis chaque dépense.
         </Typography>
-        <BoutonFlottant libelle="Nouveau budget" onClick={() => navigate('/budgets/nouveau')} />
+        <Button
+          variant="outlined"
+          fullWidth
+          startIcon={<AddRoundedIcon />}
+          onClick={() => navigate('/budgets/nouveau')}
+        >
+          Ajouter un budget
+        </Button>
       </Stack>
     )
   }
@@ -57,7 +64,7 @@ export function Budgets() {
         <Stat libelle="Restant" montantCents={etat.totaux.resteADepenserCents} />
       </Stack>
 
-      <Stack spacing={1.25} sx={{ pb: 6 }}>
+      <Stack spacing={1.25}>
         {budgets.map((budget) => (
           <LigneBudget
             key={budget.id}
@@ -67,11 +74,18 @@ export function Budgets() {
         ))}
       </Stack>
 
+      <Button
+        variant="outlined"
+        fullWidth
+        startIcon={<AddRoundedIcon />}
+        onClick={() => navigate('/budgets/nouveau')}
+      >
+        Ajouter un budget
+      </Button>
+
       <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
         Les budgets non dépensés ne sont pas reportés au cycle suivant.
       </Typography>
-
-      <BoutonFlottant libelle="Nouveau budget" onClick={() => navigate('/budgets/nouveau')} />
     </Stack>
   )
 }

@@ -3,6 +3,7 @@ import Fastify from 'fastify'
 import cookie from '@fastify/cookie'
 import statique from '@fastify/static'
 import { brancherAuthentification } from './contexte.js'
+import { attendreBase } from './db/client.js'
 import { migrer } from './db/migrer.js'
 import { routesAuth } from './routes/auth.js'
 import { routesBudgets } from './routes/budgets.js'
@@ -37,6 +38,7 @@ const app = Fastify({
  * oublier. Le runner ne rejoue que les fichiers absents de `schema_migrations`.
  */
 if (production) {
+  await attendreBase()
   const appliquees = await migrer()
   if (appliquees.length > 0) app.log.info(`Migrations appliquées : ${appliquees.join(', ')}`)
 }

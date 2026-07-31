@@ -2,17 +2,18 @@ import { useState } from 'react'
 import {
   Alert,
   Box,
+  Button,
   Skeleton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { useNavigate } from 'react-router-dom'
 import { coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { ChargeCalculee, CompteCalcule } from '@hamsterbudgeo/shared/types.js'
-import { BoutonFlottant } from '../components/BoutonFlottant.js'
 import { Carte } from '../components/Carte.js'
 import { PuceType } from '../components/PuceType.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
@@ -111,7 +112,7 @@ export function Charges() {
   const groupes = grouper(etat.comptes, axe)
 
   return (
-    <Stack spacing={2.5} sx={{ pb: 8 }}>
+    <Stack spacing={2.5} sx={{ pb: 2 }}>
       <Typography variant="titreSection">Mes charges</Typography>
 
       <Carte>
@@ -157,11 +158,18 @@ export function Charges() {
 
       {toutes.length === 0 && (
         <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
-          Aucune charge enregistrée. Utilise le bouton « + » pour en ajouter une.
+          Aucune charge enregistrée.
         </Typography>
       )}
 
-      <BoutonFlottant libelle="Nouvelle charge" onClick={() => navigate('/charges/nouvelle')} />
+      <Button
+        variant="outlined"
+        fullWidth
+        startIcon={<AddRoundedIcon />}
+        onClick={() => navigate('/charges/nouvelle')}
+      >
+        Ajouter une charge
+      </Button>
     </Stack>
   )
 }

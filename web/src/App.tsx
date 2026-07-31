@@ -17,11 +17,26 @@ import { Repartition } from './pages/Repartition.js'
 import { Virements } from './pages/Virements.js'
 import { LARGEUR_MOBILE } from './theme.js'
 
-/** Colonne mobile centrée, commune à tous les écrans. */
+/**
+ * Colonne mobile centrée, commune à tous les écrans.
+ *
+ * Le retrait haut ajoute `env(safe-area-inset-top)` : installée en plein écran, la page
+ * passe sous l'heure et les indicateurs réseau, et un titre collé au bord deviendrait
+ * illisible. La valeur vaut 0 quand rien n'empiète, donc les 40 px restent le minimum.
+ */
 function Colonne({ children, avecOnglets }: { children: React.ReactNode; avecOnglets: boolean }) {
   return (
     <Box sx={{ minHeight: '100dvh', pb: avecOnglets ? 10 : 4 }}>
-      <Box sx={{ maxWidth: LARGEUR_MOBILE, mx: 'auto', px: 2, pt: 4 }}>{children}</Box>
+      <Box
+        sx={{
+          maxWidth: LARGEUR_MOBILE,
+          mx: 'auto',
+          px: 2,
+          pt: 'calc(env(safe-area-inset-top, 0px) + 40px)',
+        }}
+      >
+        {children}
+      </Box>
       {avecOnglets && <BarreOnglets />}
     </Box>
   )

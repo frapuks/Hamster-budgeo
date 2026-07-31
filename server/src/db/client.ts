@@ -22,3 +22,28 @@ export async function baseRepond(): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * Attend que la base accepte les requêtes avant de laisser le serveur écouter.
+ *
+ * PostgreSQL accepte les connexions TCP avant d'avoir fini de démarrer et répond alors
+ * « the database system is starting up » : sans cette attente, toute requête reçue
+ * pendant ce laps de temps échoue en 500. C'est particulièrement visible au premier
+ * lancement sur une carte SD.
+ */
+export async function attendreBase(secondes = 60): Promise<void> {
+  const limite = Date.now() + secondes * 1000
+  let derniere: unknown
+
+  while (Date.now() < limite) {
+    try {
+      await sql`SELECT 1`
+      return
+    } catch (erreur) {
+      derniere = erreur
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+  }
+
+  throw new Error(`Base injoignable après ${secondes} s : ${String(derniere)}`)
+}
