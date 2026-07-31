@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { ajouterDepense, supprimerDepense } from '../db/depenses.js'
-import { foyerCourant, lireEtat } from '../db/etat.js'
+import { lireEtat } from '../db/etat.js'
+import { foyerDeLaRequete } from '../contexte.js'
 
 const schemaAjout = {
   params: {
@@ -42,8 +43,7 @@ export async function routesDepenses(app: FastifyInstance) {
     Params: { id: number }
     Body: { libelle?: string; montantCents: number; dateDepense?: string; personneId?: number | null }
   }>('/api/budgets/:id/depenses', { schema: schemaAjout }, async (req, reply) => {
-    const foyerId = await foyerCourant()
-    if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+    const foyerId = foyerDeLaRequete(req)
 
     const ajoutee = await ajouterDepense(foyerId, req.params.id, {
       libelle: req.body.libelle ?? '',
@@ -60,8 +60,7 @@ export async function routesDepenses(app: FastifyInstance) {
     '/api/depenses/:id',
     { schema: schemaSuppression },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const supprimee = await supprimerDepense(foyerId, req.params.id)
       if (!supprimee) return reply.code(404).send({ erreur: 'Dépense introuvable.' })

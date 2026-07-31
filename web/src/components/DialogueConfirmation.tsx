@@ -7,7 +7,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography }
  * récupérable : c'est ce qui justifie la confirmation, et pourquoi le bouton d'action
  * annonce explicitement ce qu'il détruit plutôt qu'un « OK » anonyme.
  *
- * Réutilisé pour la suppression d'une charge (lot 7) et le nouveau cycle (lot 8).
+ * Réutilisé pour la suppression d'une charge, d'un compte et d'une dépense.
  */
 export function DialogueConfirmation({
   ouvert,

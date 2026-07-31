@@ -5,7 +5,7 @@ import { RAYONS } from '../theme.js'
 
 /**
  * Couleurs de catégorie, choisies claires pour rester lisibles sur fond marine.
- * Le choix appartient à l'utilisateur, stocké en base au lot 1.
+ * Le choix appartient à l'utilisateur ; la couleur est stockée en base.
  */
 export const COULEURS_CATEGORIE = {
   bleu: '#6B8CFF',

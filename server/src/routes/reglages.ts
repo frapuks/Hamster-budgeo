@@ -9,7 +9,8 @@ import {
   supprimerCompte,
 } from '../db/comptes.js'
 import { viderFoyer } from '../db/donnees.js'
-import { foyerCourant, lireEtat } from '../db/etat.js'
+import { lireEtat } from '../db/etat.js'
+import { foyerDeLaRequete } from '../contexte.js'
 import { semer } from '../seed.js'
 
 const paramId = {
@@ -54,8 +55,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/comptes',
     { schema: { body: corpsCompte } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       await creerCompte(foyerId, {
         ...req.body,
@@ -70,8 +70,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/comptes/:id',
     { schema: { params: paramId, body: corpsCompte } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const ok = await modifierCompte(foyerId, req.params.id, {
         ...req.body,
@@ -88,8 +87,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/comptes/:id',
     { schema: { params: paramId } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const ok = await supprimerCompte(foyerId, req.params.id)
       if (!ok) return reply.code(404).send({ erreur: 'Compte introuvable.' })
@@ -102,8 +100,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/comptes/ordre',
     { schema: { body: corpsOrdre } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       await reordonnerComptes(foyerId, req.body.ids)
       return lireEtat(foyerId)
@@ -115,8 +112,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/categories',
     { schema: { body: corpsCategorie } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       await creerCategorie(foyerId, req.body)
       return reply.code(201).send(await lireEtat(foyerId))
@@ -127,8 +123,7 @@ export async function routesReglages(app: FastifyInstance) {
     '/api/categories/:id',
     { schema: { params: paramId } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const ok = await supprimerCategorie(foyerId, req.params.id)
       if (!ok) return reply.code(404).send({ erreur: 'Catégorie introuvable.' })
@@ -141,22 +136,20 @@ export async function routesReglages(app: FastifyInstance) {
   app.post(
     '/api/donnees/demo',
     { schema: { body: { type: 'object', additionalProperties: false } } },
-    async () => {
-      // Le seed recrée le foyer de zéro : on relit ensuite le foyer courant, dont
-      // l'identifiant a changé.
-      await semer()
-      const foyerId = await foyerCourant()
-      return foyerId === null ? { erreur: 'Chargement impossible.' } : lireEtat(foyerId)
+    async (req) => {
+      // Variante ciblée du seed : elle remplace le contenu budgétaire du foyer sans
+      // toucher aux personnes ni aux comptes utilisateurs.
+      const foyerId = foyerDeLaRequete(req)
+      await semer(foyerId)
+      return lireEtat(foyerId)
     },
   )
 
   app.post(
     '/api/donnees/effacer',
     { schema: { body: { type: 'object', additionalProperties: false } } },
-    async (_req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
-
+    async (req) => {
+      const foyerId = foyerDeLaRequete(req)
       await viderFoyer(foyerId)
       return lireEtat(foyerId)
     },

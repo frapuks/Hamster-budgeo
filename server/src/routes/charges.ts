@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import type { SaisieCharge } from '../db/charges.js'
 import { cocherCharge, creerCharge, modifierCharge, supprimerCharge } from '../db/charges.js'
-import { foyerCourant, lireEtat } from '../db/etat.js'
+import { lireEtat } from '../db/etat.js'
+import { foyerDeLaRequete } from '../contexte.js'
 
 /** Corps commun à la création et à la modification. */
 const corpsCharge = {
@@ -54,10 +55,7 @@ export async function routesCharges(app: FastifyInstance) {
     '/api/charges/:id/prelevee',
     { schema: schemaCochage },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) {
-        return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
-      }
+      const foyerId = foyerDeLaRequete(req)
 
       const modifiee = await cocherCharge(foyerId, req.params.id, req.body.estPrelevee)
       if (!modifiee) {
@@ -72,8 +70,7 @@ export async function routesCharges(app: FastifyInstance) {
     '/api/charges',
     { schema: { body: corpsCharge } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const creee = await creerCharge(foyerId, {
         ...req.body,
@@ -90,8 +87,7 @@ export async function routesCharges(app: FastifyInstance) {
     '/api/charges/:id',
     { schema: { params: paramId, body: corpsCharge } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const modifiee = await modifierCharge(foyerId, req.params.id, {
         ...req.body,
@@ -108,8 +104,7 @@ export async function routesCharges(app: FastifyInstance) {
     '/api/charges/:id',
     { schema: { params: paramId } },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const supprimee = await supprimerCharge(foyerId, req.params.id)
       if (!supprimee) return reply.code(404).send({ erreur: 'Charge introuvable.' })

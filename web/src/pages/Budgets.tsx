@@ -1,6 +1,7 @@
 import { Alert, Box, Divider, Skeleton, Stack, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { formatEuros } from '@shared/format.js'
+import { BoutonFlottant } from '../components/BoutonFlottant.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { useEtat } from '../hooks/useEtat.js'
 
@@ -38,8 +39,10 @@ export function Budgets() {
       <Stack spacing={2}>
         <Typography variant="titreSection">Mes budgets</Typography>
         <Typography variant="body2">
-          Aucun budget pour l'instant. Ils arriveront avec l'écran de création, au lot 7.
+          Aucun budget pour l'instant. Un budget est une enveloppe mensuelle — courses,
+          essence, restaurants — dont tu déduis chaque dépense.
         </Typography>
+        <BoutonFlottant libelle="Nouveau budget" onClick={() => navigate('/budgets/nouveau')} />
       </Stack>
     )
   }
@@ -54,7 +57,7 @@ export function Budgets() {
         <Stat libelle="Restant" montantCents={etat.totaux.resteADepenserCents} />
       </Stack>
 
-      <Stack spacing={1.25}>
+      <Stack spacing={1.25} sx={{ pb: 6 }}>
         {budgets.map((budget) => (
           <LigneBudget
             key={budget.id}
@@ -67,6 +70,8 @@ export function Budgets() {
       <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
         Les budgets non dépensés ne sont pas reportés au cycle suivant.
       </Typography>
+
+      <BoutonFlottant libelle="Nouveau budget" onClick={() => navigate('/budgets/nouveau')} />
     </Stack>
   )
 }

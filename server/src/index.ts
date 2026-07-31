@@ -1,4 +1,8 @@
 import Fastify from 'fastify'
+import cookie from '@fastify/cookie'
+import { brancherAuthentification } from './contexte.js'
+import { routesAuth } from './routes/auth.js'
+import { routesBudgets } from './routes/budgets.js'
 import { routesCharges } from './routes/charges.js'
 import { routesCycle } from './routes/cycle.js'
 import { routesDebug } from './routes/debug.js'
@@ -16,9 +20,14 @@ const app = Fastify({
   },
 })
 
+await app.register(cookie)
+brancherAuthentification(app)
+
+await app.register(routesAuth)
 await app.register(routesSante)
 await app.register(routesEtat)
 await app.register(routesCharges)
+await app.register(routesBudgets)
 await app.register(routesDepenses)
 await app.register(routesCycle)
 await app.register(routesFoyer)

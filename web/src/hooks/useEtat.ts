@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { EtatFoyer } from '@shared/types.js'
-import { api } from '../api/client.js'
+import { api, ErreurApi } from '../api/client.js'
 
 /**
  * L'unique clé de cache de l'application.
@@ -17,6 +17,10 @@ export function useEtat() {
   return useQuery<EtatFoyer>({
     queryKey: CLE_ETAT,
     queryFn: api.getEtat,
+    // Une session absente ou expirée n'est pas une panne : inutile de réessayer, c'est
+    // l'écran de connexion qui doit prendre le relais.
+    retry: (nombreEssais, erreur) =>
+      erreur instanceof ErreurApi && erreur.statut === 401 ? false : nombreEssais < 2,
   })
 }
 

@@ -13,11 +13,35 @@ import type {
  * en production c'est le serveur lui-même qui sert les fichiers statiques. Aucune
  * question de CORS dans un cas comme dans l'autre.
  */
+/**
+ * Erreur portant le code HTTP et le message du serveur.
+ *
+ * Le code est nécessaire pour distinguer « non connecté » (401), qui doit renvoyer vers
+ * l'écran de connexion, d'une vraie panne, qui doit afficher un message d'erreur.
+ */
+export class ErreurApi extends Error {
+  constructor(
+    readonly statut: number,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+async function lireErreur(reponse: Response, chemin: string): Promise<never> {
+  let message = `${chemin} a répondu ${reponse.status}`
+  try {
+    const corps = (await reponse.json()) as { erreur?: string }
+    if (corps.erreur) message = corps.erreur
+  } catch {
+    // Réponse sans corps JSON : on garde le message par défaut.
+  }
+  throw new ErreurApi(reponse.status, message)
+}
+
 async function get<T>(chemin: string): Promise<T> {
   const reponse = await fetch(chemin)
-  if (!reponse.ok) {
-    throw new Error(`${chemin} a répondu ${reponse.status}`)
-  }
+  if (!reponse.ok) await lireErreur(reponse, chemin)
   return reponse.json() as Promise<T>
 }
 
@@ -27,9 +51,7 @@ async function patch<T>(chemin: string, corps: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(corps),
   })
-  if (!reponse.ok) {
-    throw new Error(`${chemin} a répondu ${reponse.status}`)
-  }
+  if (!reponse.ok) await lireErreur(reponse, chemin)
   return reponse.json() as Promise<T>
 }
 
@@ -41,6 +63,13 @@ export interface SaisieCharge {
   /** Par mois si `mensuelle`, PAR AN si `annuelle`. */
   montantCents: number
   jourPrelevement: number | null
+}
+
+export interface SaisieBudget {
+  compteId: number
+  categorieId: number | null
+  nom: string
+  montantMensuelCents: number
 }
 
 export interface SaisieCompte {
@@ -66,9 +95,7 @@ async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: un
       ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps ?? {}) }
       : {}),
   })
-  if (!reponse.ok) {
-    throw new Error(`${chemin} a répondu ${reponse.status}`)
-  }
+  if (!reponse.ok) await lireErreur(reponse, chemin)
   return reponse.json() as Promise<T>
 }
 
@@ -101,6 +128,11 @@ export const api = {
     patch<EtatFoyer>(`/api/charges/${id}`, saisie),
   supprimerCharge: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/charges/${id}`),
 
+  creerBudget: (saisie: SaisieBudget) => envoyer<EtatFoyer>('POST', '/api/budgets', saisie),
+  modifierBudget: (id: number, saisie: SaisieBudget) =>
+    patch<EtatFoyer>(`/api/budgets/${id}`, saisie),
+  supprimerBudget: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/budgets/${id}`),
+
   demarrerNouveauCycle: () => envoyer<EtatFoyer>('POST', '/api/cycle/reset'),
 
   modifierSalaire: (personneId: number, salaireNetCents: number) =>
@@ -120,4 +152,18 @@ export const api = {
 
   chargerDemo: () => envoyer<EtatFoyer>('POST', '/api/donnees/demo'),
   toutEffacer: () => envoyer<EtatFoyer>('POST', '/api/donnees/effacer'),
+
+  moi: () => get<{ email: string; personneId: number | null }>('/api/auth/moi'),
+  inscription: (saisie: {
+    email: string
+    motDePasse: string
+    prenom: string
+    prenomConjoint: string
+  }) => envoyer<EtatFoyer>('POST', '/api/auth/inscription', saisie),
+  connexion: (email: string, motDePasse: string) =>
+    envoyer<EtatFoyer>('POST', '/api/auth/connexion', { email, motDePasse }),
+  deconnexion: () => envoyer<{ ok: boolean }>('POST', '/api/auth/deconnexion'),
+  rejoindre: (code: string, email: string, motDePasse: string) =>
+    envoyer<EtatFoyer>('POST', '/api/auth/rejoindre', { code, email, motDePasse }),
+  creerInvitation: () => envoyer<{ code: string; prenom: string }>('POST', '/api/invitations'),
 }

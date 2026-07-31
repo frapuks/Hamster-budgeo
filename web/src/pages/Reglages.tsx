@@ -17,10 +17,11 @@ import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@shared/format.js'
 import type { CompteCalcule, EtatFoyer } from '@shared/types.js'
-import { api } from '../api/client.js'
+import { api, ErreurApi } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
@@ -61,6 +62,20 @@ export function Reglages() {
   const supprimerCompte = useMutation({ mutationFn: api.supprimerCompte, onSuccess: surSucces })
   const chargerDemo = useMutation({ mutationFn: api.chargerDemo, onSuccess: surSucces })
   const toutEffacer = useMutation({ mutationFn: api.toutEffacer, onSuccess: surSucces })
+  const invitation = useMutation({ mutationFn: api.creerInvitation })
+
+  /**
+   * Déconnexion, suivie d'un rechargement complet de la page.
+   *
+   * Vider le cache ne suffisait pas : l'écran courant restait monté et déclenchait
+   * aussitôt une lecture refusée, affichant une erreur au lieu de l'écran de connexion.
+   * Un rechargement repart d'un état propre, cache et navigation compris — c'est aussi
+   * le comportement attendu d'une déconnexion.
+   */
+  const deconnexion = useMutation({
+    mutationFn: api.deconnexion,
+    onSuccess: () => window.location.assign('/'),
+  })
 
   if (isPending) {
     return (
@@ -215,6 +230,51 @@ export function Reglages() {
             </Box>
           </Stack>
         </Carte>
+      </Section>
+
+      {/* Compte ------------------------------------------------------------- */}
+      <Section titre="Mon compte">
+        <Stack spacing={1.25}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<PersonAddRoundedIcon />}
+            disabled={invitation.isPending}
+            onClick={() => invitation.mutate()}
+          >
+            Inviter mon conjoint
+          </Button>
+
+          {invitation.isSuccess && (
+            <Carte sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ fontSize: '0.8125rem', mb: 1 }}>
+                Transmets ce code à {invitation.data.prenom}. Il ouvre l'accès aux mêmes
+                données, avec les mêmes droits.
+              </Typography>
+              <Typography
+                variant="montantCarte"
+                sx={{ letterSpacing: '0.25em', color: 'bleuClair' }}
+              >
+                {invitation.data.code}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.6875rem', mt: 1 }}>
+                Valable 7 jours
+              </Typography>
+            </Carte>
+          )}
+
+          {invitation.isError && (
+            <Alert severity="error">
+              {invitation.error instanceof ErreurApi
+                ? invitation.error.message
+                : 'Invitation impossible.'}
+            </Alert>
+          )}
+
+          <Button variant="text" fullWidth onClick={() => deconnexion.mutate()}>
+            Se déconnecter
+          </Button>
+        </Stack>
       </Section>
 
       {/* Données ------------------------------------------------------------ */}

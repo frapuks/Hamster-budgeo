@@ -11,7 +11,8 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
-import { useParams } from 'react-router-dom'
+import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import { useNavigate, useParams } from 'react-router-dom'
 import { formatDate, formatEuros } from '@shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
 import { Carte } from '../components/Carte.js'
@@ -26,6 +27,7 @@ import { COULEURS } from '../theme.js'
 
 export function DetailBudget() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const retour = useRetour('/budgets')
   const { data: etat, isPending, isError } = useEtat()
   const supprimer = useSupprimerDepense()
@@ -68,9 +70,15 @@ export function DetailBudget() {
           couleur={couleurDe(budget.categorie?.couleur)}
           taille={36}
         />
-        <Typography variant="h6" noWrap>
+        <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
           {budget.nom}
         </Typography>
+        <IconButton
+          aria-label="Modifier le budget"
+          onClick={() => navigate(`/budgets/${budget.id}/modifier`)}
+        >
+          <EditRoundedIcon />
+        </IconButton>
       </Stack>
 
       {/* Anneau -------------------------------------------------------------- */}

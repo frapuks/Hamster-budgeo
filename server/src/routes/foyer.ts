@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import type { ModeRepartition } from '@shared/types.js'
-import { foyerCourant, lireEtat } from '../db/etat.js'
+import { lireEtat } from '../db/etat.js'
+import { foyerDeLaRequete } from '../contexte.js'
 import { definirModeRepartition, modifierSalaire } from '../db/foyer.js'
 
 const schemaSalaire = {
@@ -35,8 +36,7 @@ export async function routesFoyer(app: FastifyInstance) {
     '/api/personnes/:id/salaire',
     { schema: schemaSalaire },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       const ok = await modifierSalaire(foyerId, req.params.id, req.body.salaireNetCents)
       if (!ok) return reply.code(404).send({ erreur: 'Personne introuvable.' })
@@ -49,8 +49,7 @@ export async function routesFoyer(app: FastifyInstance) {
     '/api/foyer/repartition',
     { schema: schemaMode },
     async (req, reply) => {
-      const foyerId = await foyerCourant()
-      if (foyerId === null) return reply.code(404).send({ erreur: 'Aucun foyer en base.' })
+      const foyerId = foyerDeLaRequete(req)
 
       await definirModeRepartition(foyerId, req.body.mode)
       return lireEtat(foyerId)

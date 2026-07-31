@@ -112,24 +112,63 @@ const BUDGETS = [
 
 const DEBUT_CYCLE = '2025-07-01'
 
-export async function semer(): Promise<{ foyerId: number }> {
+/**
+ * Charge le jeu de démonstration.
+ *
+ * Deux usages, volontairement distincts :
+ *
+ *  • `semer()` sans argument — la commande `npm run seed` : remet toute la base à zéro,
+ *    comptes utilisateurs compris. Réservé au développement.
+ *  • `semer(foyerId)` — le bouton « Charger la démonstration » : remplace le contenu
+ *    budgétaire du foyer visé sans supprimer ni les personnes ni les comptes
+ *    utilisateurs. Sans cette distinction, charger la démo depuis l'application
+ *    déconnecterait les deux membres du foyer et détruirait leurs identifiants.
+ */
+export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }> {
   return sql.begin(async (tx) => {
-    // Table par table plutôt qu'un TRUNCATE global : on ne touche pas à
-    // schema_migrations, et l'ordre respecte les clés étrangères.
-    await tx`TRUNCATE depense, budget, charge, compte, categorie, invitation, utilisateur, personne, foyer RESTART IDENTITY CASCADE`
+    if (foyerIdCible === undefined) {
+      // Table par table plutôt qu'un TRUNCATE global : on ne touche pas à
+      // schema_migrations, et l'ordre respecte les clés étrangères.
+      await tx`TRUNCATE depense, budget, charge, compte, categorie, invitation, session, utilisateur, personne, foyer RESTART IDENTITY CASCADE`
+    }
 
-    const [foyer] = await tx<{ id: number }[]>`
-      INSERT INTO foyer (nom, mode_repartition, dernier_reset)
-      VALUES ('Foyer', 'prorata_revenus', ${DEBUT_CYCLE})
-      RETURNING id
-    `
-    const foyerId = foyer!.id
+    let foyerId: number
 
-    await tx`
-      INSERT INTO personne (foyer_id, prenom, salaire_net_cents, couleur, ordre)
-      VALUES (${foyerId}, 'Hélène', 280000, 'violet', 0),
-             (${foyerId}, 'Francis', 220000, 'turquoise', 1)
-    `
+    if (foyerIdCible === undefined) {
+      const [foyer] = await tx<{ id: number }[]>`
+        INSERT INTO foyer (nom, mode_repartition, dernier_reset)
+        VALUES ('Foyer', 'prorata_revenus', ${DEBUT_CYCLE})
+        RETURNING id
+      `
+      foyerId = foyer!.id
+
+      await tx`
+        INSERT INTO personne (foyer_id, prenom, salaire_net_cents, couleur, ordre)
+        VALUES (${foyerId}, 'Hélène', 280000, 'violet', 0),
+               (${foyerId}, 'Francis', 220000, 'turquoise', 1)
+      `
+    } else {
+      // Rechargement depuis l'application : on remplace le contenu budgétaire du foyer
+      // sans toucher aux personnes ni aux comptes utilisateurs. Les salaires sont
+      // ramenés aux valeurs de référence, sans quoi les montants de répartition
+      // affichés ne correspondraient plus à ceux de la documentation.
+      foyerId = foyerIdCible
+      await tx`DELETE FROM compte WHERE foyer_id = ${foyerId}`
+      await tx`DELETE FROM categorie WHERE foyer_id = ${foyerId}`
+      await tx`
+        UPDATE foyer SET mode_repartition = 'prorata_revenus', dernier_reset = ${DEBUT_CYCLE}
+        WHERE id = ${foyerId}
+      `
+      const personnes = await tx<{ id: number }[]>`
+        SELECT id FROM personne WHERE foyer_id = ${foyerId} ORDER BY ordre, id
+      `
+      const salaires = [280000, 220000]
+      for (const [i, personne] of personnes.entries()) {
+        await tx`
+          UPDATE personne SET salaire_net_cents = ${salaires[i] ?? 0} WHERE id = ${personne.id}
+        `
+      }
+    }
 
     const categories = await tx<{ id: number; nom: string }[]>`
       INSERT INTO categorie ${tx(
