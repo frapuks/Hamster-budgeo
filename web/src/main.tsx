@@ -15,6 +15,19 @@ const queryClient = new QueryClient({
   },
 })
 
+/**
+ * Uniquement sur une version compilée : en développement, un cache d'anciens fichiers
+ * masquerait les modifications en cours.
+ *
+ * ⚠️ Le navigateur refuse un service worker hors contexte sécurisé — `localhost` fait
+ * exception, pas une adresse IP locale en HTTP.
+ */
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('/sw.js')
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>

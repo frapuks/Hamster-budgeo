@@ -3,13 +3,8 @@ import type { SxProps, Theme } from '@mui/material/styles'
 import { COULEURS, RAYONS } from '../theme.js'
 
 /**
- * Surface standard : marine clair, liseré discret.
- *
- * Le liseré est ce qui détache la carte du fond ; sans lui tout se noie. Il n'existe
- * qu'ici, jamais réécrit dans un écran.
- *
- * ⚠️ `borderRadius` n'est jamais un nombre dans `sx` : un nombre y multiplie
- * theme.shape.borderRadius. Toujours un jeton `RAYONS.x` en chaîne `px`.
+ * Surface standard. Le liseré, défini ici seulement, est ce qui détache la carte du
+ * fond marine.
  */
 export function Carte({
   children,
@@ -38,7 +33,7 @@ export function Carte({
   )
 }
 
-/** Surface bleu plein : réservée à l'élément mis en avant d'une série. */
+/** Réservée à l'élément mis en avant d'une série. */
 export function CarteBleue({
   children,
   sx = {},

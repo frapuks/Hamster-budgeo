@@ -2,14 +2,11 @@ import { createHash, randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { sql } from './client.js'
 
-/** Durée de vie d'une session. Long : c'est une app domestique, pas une banque. */
 const DUREE_SESSION_JOURS = 60
 const DUREE_INVITATION_JOURS = 7
 
-/**
- * Le jeton de session circule en clair dans le cookie, mais n'est stocké qu'en
- * empreinte. Une lecture de la base ne permet donc pas d'usurper une session.
- */
+/** Le jeton circule en clair dans le cookie mais n'est stocké qu'en empreinte : une
+ *  lecture de la base ne permet pas d'usurper une session. */
 const empreinte = (jeton: string) => createHash('sha256').update(jeton).digest('hex')
 
 export interface Identite {
@@ -19,7 +16,6 @@ export interface Identite {
   email: string
 }
 
-// ── Inscription ──────────────────────────────────────────────────────────────
 
 export interface Inscription {
   email: string
@@ -31,11 +27,9 @@ export interface Inscription {
 /**
  * Crée un compte et son foyer.
  *
- * Cas particulier de la première inscription : si la base contient déjà un foyer sans
- * aucun utilisateur — typiquement les données saisies avant la mise en place des
- * comptes, ou le jeu de démonstration — le nouvel utilisateur l'adopte au lieu d'en
- * créer un vide à côté. Sans ça, activer l'authentification rendrait les données
- * existantes définitivement inaccessibles.
+ * Si la base contient déjà un foyer sans aucun utilisateur, le nouvel utilisateur
+ * l'adopte au lieu d'en créer un vide à côté — sinon les données saisies avant la mise
+ * en place des comptes deviendraient inaccessibles.
  */
 export async function inscrire(saisie: Inscription): Promise<Identite | 'email_pris'> {
   const [existant] = await sql`SELECT id FROM utilisateur WHERE email = ${saisie.email.toLowerCase()}`
@@ -61,9 +55,7 @@ export async function inscrire(saisie: Inscription): Promise<Identite | 'email_p
         SELECT id FROM personne WHERE foyer_id = ${foyerId} ORDER BY ordre, id LIMIT 1
       `
       if (premiere) {
-        // On se rattache à la personne existante sans la renommer : les prénoms déjà
-        // saisis font foi, et écraser le premier avec celui du formulaire produirait
-        // deux personnes du même nom.
+        // Sans renommer : les prénoms déjà saisis font foi.
         personneId = premiere.id
       } else {
         const [creee] = await tx<{ id: number }[]>`
@@ -104,7 +96,6 @@ export async function inscrire(saisie: Inscription): Promise<Identite | 'email_p
   })
 }
 
-// ── Connexion ────────────────────────────────────────────────────────────────
 
 export async function verifierIdentifiants(
   email: string,
@@ -117,8 +108,8 @@ export async function verifierIdentifiants(
            mot_de_passe AS "motDePasse"
     FROM utilisateur WHERE email = ${email.toLowerCase()}
   `
-  // La comparaison est faite même si l'utilisateur n'existe pas, pour que le temps de
-  // réponse ne révèle pas quels e-mails sont enregistrés.
+  // Comparaison faite même si l'utilisateur n'existe pas : sinon le temps de réponse
+  // révélerait quels e-mails sont enregistrés.
   const hash = utilisateur?.motDePasse ?? '$2b$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidi'
   const correct = await bcrypt.compare(motDePasse, hash)
   if (!utilisateur || !correct) return null
@@ -131,7 +122,6 @@ export async function verifierIdentifiants(
   }
 }
 
-// ── Sessions ─────────────────────────────────────────────────────────────────
 
 export async function ouvrirSession(utilisateurId: number): Promise<string> {
   const jeton = randomBytes(32).toString('hex')
@@ -160,7 +150,6 @@ export async function fermerSession(jeton: string): Promise<void> {
   await sql`DELETE FROM session WHERE jeton_hash = ${empreinte(jeton)}`
 }
 
-// ── Invitations ──────────────────────────────────────────────────────────────
 
 /**
  * Crée une invitation pour la personne du foyer qui n'a pas encore de compte.
@@ -191,11 +180,8 @@ export async function creerInvitation(foyerId: number): Promise<{ code: string; 
 }
 
 /**
- * Rattache un nouveau compte à la personne visée par l'invitation.
- *
- * C'est ici que se paie le `personne_id` nullable posé au lot 1 : le conjoint récupère
- * la personne existante, avec son salaire et son historique de répartition, sans la
- * moindre migration de données.
+ * Rattache un nouveau compte à la personne visée par l'invitation : le conjoint
+ * récupère la personne existante avec son salaire, sans migration de données.
  */
 export async function rejoindreAvecCode(
   code: string,

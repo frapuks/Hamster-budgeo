@@ -32,7 +32,7 @@ import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded'
 import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded'
 import WaterDropRoundedIcon from '@mui/icons-material/WaterDropRounded'
 import WifiRoundedIcon from '@mui/icons-material/WifiRounded'
-import { formatEuros } from '@shared/format.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
 import { Carte, CarteBleue } from '../components/Carte.js'
 import { PuceStatut } from '../components/PuceStatut.js'
@@ -41,7 +41,6 @@ import { TuileCategorie, type CouleurCategorie } from '../components/TuileCatego
 import { proportionRestante } from '../proportions.js'
 import { COULEURS, RAYONS } from '../theme.js'
 
-// ── Briques réutilisables ────────────────────────────────────────────────────
 // `Carte` et `CarteBleue` vivent maintenant dans components/Carte.tsx : la démo doit
 // utiliser exactement les mêmes composants que les écrans réels, sinon elle valide
 // une apparence que l'application n'a pas.
@@ -55,7 +54,6 @@ function EnTeteSection({ titre, action }: { titre: string; action?: string }) {
   )
 }
 
-// ── Données de démonstration ─────────────────────────────────────────────────
 
 const IMMINENTES = [
   { nom: 'Loyer', quand: 'Dans 2 jours, le 10', cents: 85000, icone: HomeRoundedIcon, couleur: 'bleu', statut: 'a_venir' },
@@ -107,7 +105,6 @@ const BUDGETS = [
   { nom: 'Loisirs', dep: 13200, total: 12000, icone: RestaurantRoundedIcon, couleur: 'corail' },
 ] as const
 
-// ── Page ─────────────────────────────────────────────────────────────────────
 
 export function Demo() {
   const [coches, setCoches] = useState<Record<string, boolean>>(
@@ -126,7 +123,6 @@ export function Demo() {
         </Typography>
       </Box>
 
-      {/* Bloc héros ------------------------------------------------------- */}
       <Stack alignItems="center" spacing={1.5}>
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="libelle" sx={{ mb: 0.75 }}>
@@ -141,7 +137,6 @@ export function Demo() {
         />
       </Stack>
 
-      {/* Anneau de progression -------------------------------------------- */}
       <Carte sx={{ p: 3 }}>
         <Typography variant="titreSection" sx={{ mb: 0.5 }}>
           Compte prélèvements
@@ -156,7 +151,6 @@ export function Demo() {
         </Box>
       </Carte>
 
-      {/* Actions rapides --------------------------------------------------- */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.5 }}>
         {[
           { libelle: 'Ajouter', Icone: AddRoundedIcon, actif: true },
@@ -183,7 +177,6 @@ export function Demo() {
         ))}
       </Box>
 
-      {/* Cartes de compte -------------------------------------------------- */}
       <Box>
         <EnTeteSection titre="Mes comptes" action="Tout voir" />
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
@@ -213,7 +206,6 @@ export function Demo() {
         </Box>
       </Box>
 
-      {/* Charges imminentes ------------------------------------------------ */}
       <Box>
         <EnTeteSection titre="Charges imminentes" action="7 jours" />
         <Stack spacing={1.25}>
@@ -237,7 +229,6 @@ export function Demo() {
         </Stack>
       </Box>
 
-      {/* Les trois natures -------------------------------------------------- */}
       <Box>
         <EnTeteSection titre="Les trois natures" />
         <Stack spacing={1.25}>
@@ -272,7 +263,6 @@ export function Demo() {
         </Typography>
       </Box>
 
-      {/* Recherche + filtres ----------------------------------------------- */}
       <Box>
         <EnTeteSection titre="Toutes les charges" />
         <Stack spacing={1.5}>
@@ -302,7 +292,6 @@ export function Demo() {
         </Stack>
       </Box>
 
-      {/* Checklist --------------------------------------------------------- */}
       <Stack spacing={1.25}>
         {CHECKLIST.map((c) => {
           const coche = coches[c.nom] ?? false
@@ -339,7 +328,6 @@ export function Demo() {
         })}
       </Stack>
 
-      {/* Budgets ----------------------------------------------------------- */}
       <Box>
         <EnTeteSection titre="Mes budgets" />
         <Stack spacing={1.5}>
@@ -380,7 +368,6 @@ export function Demo() {
         </Stack>
       </Box>
 
-      {/* Carte de mise en avant -------------------------------------------- */}
       <CarteBleue sx={{ p: 3 }}>
         <Stack direction="row" alignItems="flex-start" spacing={2}>
           <Box sx={{ flexGrow: 1 }}>
@@ -405,7 +392,6 @@ export function Demo() {
         </Stack>
       </CarteBleue>
 
-      {/* Boutons et saisie -------------------------------------------------- */}
       <Box>
         <EnTeteSection titre="Contrôles" />
         <Stack spacing={1.5}>
@@ -429,7 +415,6 @@ export function Demo() {
         </Stack>
       </Box>
 
-      {/* Surfaces flottantes ------------------------------------------------ */}
       <Drawer anchor="bottom" open={sheetOuvert} onClose={() => setSheetOuvert(false)}>
         <Stack spacing={2} sx={{ p: 3, pb: 4 }}>
           <Box

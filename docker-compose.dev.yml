@@ -1,0 +1,33 @@
+# Développement local — PostgreSQL seul.
+#
+# Le serveur et le front tournent alors hors conteneur (`npm run dev`), avec le
+# rechargement à chaud. Utilisé par `npm run db:up`.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hamsterbudgeo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hamster}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hamster}
+      POSTGRES_DB: ${POSTGRES_DB:-hamsterbudgeo}
+      TZ: Europe/Paris
+    ports:
+      # 5433 côté hôte pour ne pas entrer en conflit avec un PostgreSQL déjà installé.
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - hamsterbudgeo-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hamster} -d ${POSTGRES_DB:-hamsterbudgeo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  # Même volume que la pile complète : sur une machine de développement, on retrouve ses
+  # données quel que soit le fichier utilisé.
+  #
+  # ⚠️ Ne pas démarrer les deux piles simultanément sur la même machine : deux instances
+  # de PostgreSQL sur le même répertoire de données, la seconde refusera de démarrer.
+  hamsterbudgeo-data:

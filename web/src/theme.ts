@@ -1,17 +1,10 @@
 import { createTheme, alpha } from '@mui/material/styles'
 
 /**
- * Thème de HamsterBudgeo — source unique du style.
- *
- * Règle du projet : aucun fichier CSS parallèle, aucune couleur ni rayon écrit en dur
- * dans un composant. Tout passe par ce thème ou par la prop `sx`.
- *
- * Direction visuelle : bleu marine profond, surfaces marine clair cernées d'un liseré
- * discret, un seul bleu vif pour les actions, et les montants importants en lavande
- * claire plutôt qu'en blanc.
+ * Source unique du style : aucun fichier CSS parallèle, aucune couleur ni rayon écrit
+ * en dur dans un composant.
  */
 
-// ── Jetons de couleur ────────────────────────────────────────────────────────
 const FOND = '#0A0E1F'
 const FOND_BARRE = '#0D1228'
 const SURFACE = '#151A2E'
@@ -39,41 +32,23 @@ export const COULEURS = {
   corail: CORAIL,
 } as const
 
-/**
- * Rayons d'arrondi, en pixels.
- *
- * ⚠️ Piège MUI : dans `sx`, une valeur NUMÉRIQUE de `borderRadius` est un multiplicateur
- * de `theme.shape.borderRadius`. On n'écrit donc jamais de nombre : toujours un jeton
- * `RAYONS.x` ou une chaîne en `px`.
- */
-/**
- * Largeur maximale de l'application, en pixels.
- *
- * L'app est pensée pour le téléphone : sur un écran large elle reste dans cette
- * colonne centrée plutôt que de s'étirer. Une checklist de 1 400 px de large serait
- * illisible, et les maquettes ne vaudraient plus rien.
- */
+/** L'app reste dans cette colonne centrée sur grand écran plutôt que de s'étirer. */
 export const LARGEUR_MOBILE = 460
 
+/**
+ * ⚠️ Piège MUI : dans `sx`, une valeur NUMÉRIQUE de `borderRadius` est un multiplicateur
+ * de `theme.shape.borderRadius`. Ne jamais écrire de nombre : toujours un jeton
+ * `RAYONS.x` ou une chaîne en `px`.
+ */
 export const RAYONS = {
-  /** Cartes et surfaces principales. */
   carte: 16,
-  /** Tuiles d'icône, champs de saisie, lignes de liste. */
   tuile: 12,
-  /** Boutons — des rectangles adoucis, pas des pilules. */
   bouton: 12,
-  /** Bottom sheets et boîtes de dialogue. */
   feuille: 22,
-  /**
-   * Petites puces de nature et d'état : rectangle adouci, pas pilule. Les bords
-   * verticaux gardent une arête droite, ce qui les distingue des puces d'en-tête.
-   */
   puce: 7,
-  /** Jauges, puces d'en-tête, éléments franchement circulaires. */
   pilule: 999,
 } as const
 
-// ── Extensions de types ──────────────────────────────────────────────────────
 declare module '@mui/material/styles' {
   interface Palette {
     lisere: string
@@ -107,10 +82,7 @@ declare module '@mui/material/Typography' {
   }
 }
 
-/**
- * Chiffres à chasse fixe : sans ça, une colonne de montants « danse » d'une ligne à
- * l'autre, le `1` étant plus étroit que le `0`.
- */
+/** Sans chasse fixe, une colonne de montants « danse » : le `1` est plus étroit que le `0`. */
 const CHIFFRES_TABULAIRES = {
   fontVariantNumeric: 'tabular-nums' as const,
   fontFeatureSettings: '"tnum"',
@@ -142,8 +114,7 @@ export const theme = createTheme({
     bleuClair: BLEU_CLAIR,
   },
 
-  // Base petite : elle multiplie les valeurs numériques de `sx`. Les composants qui
-  // comptent ont leur rayon fixé explicitement plus bas.
+  // Base volontairement petite : elle multiplie les valeurs numériques de `sx`.
   shape: { borderRadius: 4 },
 
   typography: {
@@ -153,14 +124,12 @@ export const theme = createTheme({
     body2: { color: TEXTE_SECONDAIRE },
     button: { textTransform: 'none', fontWeight: 600 },
 
-    /** Titre de section : « Mes comptes », « Charges imminentes ». */
     titreSection: {
       fontSize: '1.375rem',
       fontWeight: 700,
       letterSpacing: '-0.02em',
       color: TEXTE,
     },
-    /** Le chiffre roi d'un écran. En lavande : c'est la signature visuelle. */
     montantHero: {
       fontSize: '2.5rem',
       fontWeight: 700,
@@ -169,7 +138,6 @@ export const theme = createTheme({
       color: BLEU_CLAIR,
       ...CHIFFRES_TABULAIRES,
     },
-    /** Montant d'une carte de compte ou d'un en-tête de bloc. */
     montantCarte: {
       fontSize: '1.5rem',
       fontWeight: 700,
@@ -177,7 +145,6 @@ export const theme = createTheme({
       letterSpacing: '-0.02em',
       ...CHIFFRES_TABULAIRES,
     },
-    /** Petite étiquette majuscule espacée, au-dessus d'un chiffre ou d'un groupe. */
     libelle: {
       fontSize: '0.6875rem',
       fontWeight: 600,
@@ -287,7 +254,6 @@ export const theme = createTheme({
       },
     },
 
-    // Cases carrées à coins légèrement adoucis, comme sur la référence.
     MuiCheckbox: {
       styleOverrides: {
         root: {
@@ -296,6 +262,7 @@ export const theme = createTheme({
           '& .MuiSvgIcon-root': { fontSize: 24, borderRadius: 6 },
           '&.Mui-checked': { color: BLEU },
         },
+
       },
     },
 
@@ -367,16 +334,9 @@ export const theme = createTheme({
           backgroundColor: SURFACE,
           backgroundImage: 'none',
           paddingBottom: 'env(safe-area-inset-bottom)',
-          // La feuille reste dans la colonne mobile même sur grand écran, sinon elle
-          // s'étire sur toute la largeur alors que le contenu, lui, reste centré.
-          //
-          // ⚠️ Surtout pas de `transform` ici : l'animation d'ouverture du tiroir pose
-          // son propre `transform` en style en ligne, qui écrase le nôtre — il ne
-          // resterait que le `left`, et la feuille partirait de travers.
-          //
-          // Le trio largeur définie + `left`/`right` à 0 + marges `auto` centre sans
-          // transformation : les deux marges se partagent l'espace restant à parts
-          // égales. La largeur explicite est indispensable — sans elle, les marges
+          // ⚠️ Pas de `transform` ici : l'animation du tiroir pose le sien en style en
+          // ligne et écraserait le nôtre. Le centrage passe donc par largeur définie +
+          // `left`/`right` à 0 + marges `auto` ; sans la largeur explicite, les marges
           // `auto` tombent à zéro et la feuille se colle à gauche.
           width: '100%',
           maxWidth: LARGEUR_MOBILE,

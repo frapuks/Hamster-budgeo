@@ -1,4 +1,4 @@
-import type { RoleCompte } from '@shared/types.js'
+import type { RoleCompte } from '@hamsterbudgeo/shared/types.js'
 import { sql } from './client.js'
 
 export interface SaisieCompte {
@@ -35,9 +35,8 @@ export async function modifierCompte(
 }
 
 /**
- * Supprime un compte, et avec lui ses charges, ses budgets et leurs dépenses
- * (`ON DELETE CASCADE`). C'est la suppression la plus lourde de l'application : c'est à
- * l'interface d'annoncer précisément ce qui va disparaître.
+ * Emporte charges, budgets et dépenses en cascade. Suppression la plus lourde de
+ * l'application : à l'interface d'annoncer précisément ce qui disparaît.
  */
 export async function supprimerCompte(foyerId: number, compteId: number): Promise<boolean> {
   const lignes = await sql`
@@ -47,11 +46,8 @@ export async function supprimerCompte(foyerId: number, compteId: number): Promis
 }
 
 /**
- * Réordonne les comptes d'après la liste d'identifiants reçue.
- *
- * On réécrit tous les rangs plutôt que d'échanger deux lignes : c'est une seule requête,
- * et surtout ça répare au passage d'éventuels rangs en double ou manquants. Les
- * identifiants étrangers au foyer sont ignorés par la clause WHERE.
+ * Réécrit tous les rangs plutôt que d'échanger deux lignes : ça répare au passage
+ * d'éventuels rangs en double ou manquants.
  */
 export async function reordonnerComptes(foyerId: number, ids: number[]): Promise<void> {
   if (ids.length === 0) return

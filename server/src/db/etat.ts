@@ -1,4 +1,4 @@
-import { assemblerEtat } from '@shared/calculs.js'
+import { assemblerEtat } from '@hamsterbudgeo/shared/calculs.js'
 import type {
   Budget,
   Categorie,
@@ -8,15 +8,12 @@ import type {
   ModeRepartition,
   Personne,
   RoleCompte,
-} from '@shared/types.js'
+} from '@hamsterbudgeo/shared/types.js'
 import { sql } from './client.js'
 
 /**
- * Construit l'état complet d'un foyer : données brutes lues en SQL, puis enrichies par
- * les fonctions pures de `shared/calculs.ts`.
- *
- * Convention de l'API : c'est CET objet que renvoient GET /api/etat et chacune des
- * mutations. Le front n'a donc jamais d'invalidation de cache à gérer.
+ * Objet renvoyé par GET /api/etat et par chaque mutation : le front écrase son cache
+ * avec la réponse, sans jamais avoir d'invalidation à gérer.
  */
 export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
   const [foyer] = await sql<
@@ -87,7 +84,6 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
     depenses: lignesDepenses.filter((d) => d.budgetId === b.id),
   }))
 
-  // Toute l'agrégation vit dans shared/calculs.ts : ce module ne fait que lire.
   return assemblerEtat({
     foyer: {
       id: foyer.id,
@@ -107,11 +103,8 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
 }
 
 /**
- * `YYYY-MM-DD` en heure locale.
- *
- * `toISOString()` convertirait en UTC et pourrait reculer d'un jour selon le fuseau —
- * un 1er juillet affiché « 30 juin » serait particulièrement déroutant sur un écran
- * dont tout l'objet est la date du dernier reset.
+ * `YYYY-MM-DD` en heure locale. `toISOString()` convertirait en UTC et pourrait reculer
+ * d'un jour, affichant « 30 juin » pour un 1er juillet.
  */
 function formaterDateIso(date: Date): string {
   const mois = String(date.getMonth() + 1).padStart(2, '0')
@@ -119,7 +112,7 @@ function formaterDateIso(date: Date): string {
   return `${date.getFullYear()}-${mois}-${jour}`
 }
 
-/** Identifiant du foyer courant. Codé en dur jusqu'au lot 11 (authentification). */
+/** Premier foyer de la base. Utilisé par `npm run seed`, hors contexte de session. */
 export async function foyerCourant(): Promise<number | null> {
   const [ligne] = await sql<{ id: number }[]>`SELECT id FROM foyer ORDER BY id LIMIT 1`
   return ligne?.id ?? null

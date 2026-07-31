@@ -21,11 +21,8 @@ export async function creerCategorie(
 }
 
 /**
- * Supprime une catégorie.
- *
- * Les charges et budgets qui l'utilisaient ne sont pas supprimés : leur `categorie_id`
- * passe à NULL (`ON DELETE SET NULL`). Perdre un classement ne doit jamais faire perdre
- * un montant.
+ * Les charges et budgets concernés passent à `categorie_id NULL` : perdre un classement
+ * ne doit jamais faire perdre un montant.
  */
 export async function supprimerCategorie(foyerId: number, categorieId: number): Promise<boolean> {
   const lignes = await sql`

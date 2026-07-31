@@ -14,12 +14,8 @@ declare module 'fastify' {
 const PUBLIQUES = ['/api/health', '/api/auth/']
 
 /**
- * Résout la session à chaque requête et refuse l'accès aux routes protégées.
- *
- * C'est le seul endroit qui a changé au lot 11 : depuis le lot 1, toutes les fonctions
- * d'accès aux données prennent un `foyerId` en premier argument, fourni par ce point
- * unique. Il était codé en dur ; il vient maintenant de la session. Aucune requête SQL
- * n'a eu à être reprise.
+ * Résout la session à chaque requête et refuse l'accès aux routes protégées. Point
+ * unique d'où sort le `foyerId` que prennent toutes les fonctions d'accès aux données.
  */
 export function brancherAuthentification(app: FastifyInstance) {
   app.decorateRequest('identite', null)
@@ -35,12 +31,7 @@ export function brancherAuthentification(app: FastifyInstance) {
   })
 }
 
-/**
- * Foyer de la requête courante.
- *
- * Les routes protégées peuvent l'appeler sans vérification supplémentaire : le hook
- * ci-dessus a déjà répondu 401 si la session manquait.
- */
+/** Sans vérification supplémentaire : le hook ci-dessus a déjà répondu 401 sans session. */
 export function foyerDeLaRequete(req: FastifyRequest): number {
   if (!req.identite) throw new Error('foyerDeLaRequete appelé hors session')
   return req.identite.foyerId

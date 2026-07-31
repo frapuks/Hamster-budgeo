@@ -50,7 +50,6 @@ const corpsOrdre = {
 } as const
 
 export async function routesReglages(app: FastifyInstance) {
-  // ── Comptes ────────────────────────────────────────────────────────────────
   app.post<{ Body: SaisieCompte }>(
     '/api/comptes',
     { schema: { body: corpsCompte } },
@@ -107,7 +106,6 @@ export async function routesReglages(app: FastifyInstance) {
     },
   )
 
-  // ── Catégories ─────────────────────────────────────────────────────────────
   app.post<{ Body: SaisieCategorie }>(
     '/api/categories',
     { schema: { body: corpsCategorie } },
@@ -132,7 +130,6 @@ export async function routesReglages(app: FastifyInstance) {
     },
   )
 
-  // ── Données ────────────────────────────────────────────────────────────────
   app.post(
     '/api/donnees/demo',
     { schema: { body: { type: 'object', additionalProperties: false } } },

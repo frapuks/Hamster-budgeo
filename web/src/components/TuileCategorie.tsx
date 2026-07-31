@@ -3,10 +3,7 @@ import { alpha } from '@mui/material/styles'
 import type { SvgIconComponent } from '@mui/icons-material'
 import { RAYONS } from '../theme.js'
 
-/**
- * Couleurs de catégorie, choisies claires pour rester lisibles sur fond marine.
- * Le choix appartient à l'utilisateur ; la couleur est stockée en base.
- */
+/** Choisies claires pour rester lisibles sur fond marine. */
 export const COULEURS_CATEGORIE = {
   bleu: '#6B8CFF',
   violet: '#B98CFF',
@@ -19,12 +16,7 @@ export const COULEURS_CATEGORIE = {
 
 export type CouleurCategorie = keyof typeof COULEURS_CATEGORIE
 
-/**
- * Pastille carrée arrondie portant l'icône d'une catégorie.
- *
- * Fond translucide teinté et icône de la même teinte, plutôt qu'un aplat saturé :
- * sur fond marine, l'aplat crie et casse la hiérarchie, la teinte s'intègre.
- */
+/** Fond teinté translucide plutôt qu'aplat saturé : sur marine, l'aplat casse la hiérarchie. */
 export function TuileCategorie({
   Icone,
   couleur,

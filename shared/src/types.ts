@@ -1,17 +1,12 @@
 /**
- * Types de domaine, écrits à la main.
- *
- * Sans ORM, rien ne garantit automatiquement que ces types correspondent aux requêtes
- * SQL : ils font foi, et les fonctions de `server/src/db/` doivent s'y conformer.
- *
- * Rappel : tous les montants sont des ENTIERS en CENTIMES.
+ * Types de domaine. Sans ORM, ils font foi : c'est aux requêtes SQL de s'y conformer.
+ * Tous les montants sont des entiers en centimes.
  */
 
 export type RoleCompte = 'prelevements' | 'courant' | 'provisions'
 export type TypeCharge = 'mensuelle' | 'annuelle'
 export type ModeRepartition = 'moitie' | 'prorata_revenus' | 'reste_a_vivre_egal'
 
-// ── Données brutes ───────────────────────────────────────────────────────────
 
 export interface Categorie {
   id: number
@@ -27,11 +22,7 @@ export interface Personne {
   couleur: string
 }
 
-/**
- * ⚠️ `montantCents` change d'unité selon `type` : par mois si `mensuelle`, PAR AN si
- * `annuelle`. Ne jamais l'utiliser directement dans un calcul — passer par
- * `coutMensuelLisse()`.
- */
+/** ⚠️ `montantCents` : par mois si `mensuelle`, PAR AN si `annuelle`. Voir coutMensuelLisse(). */
 export interface Charge {
   id: number
   compteId: number
@@ -62,7 +53,6 @@ export interface Budget {
   depenses: Depense[]
 }
 
-// ── Données enrichies des calculs ────────────────────────────────────────────
 
 export interface ChargeCalculee extends Charge {
   /** Contribution mensuelle au virement permanent. */

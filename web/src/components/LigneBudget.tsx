@@ -1,6 +1,6 @@
 import { Box, LinearProgress, Stack, Typography } from '@mui/material'
-import { formatEuros } from '@shared/format.js'
-import type { BudgetCalcule } from '@shared/types.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { BudgetCalcule } from '@hamsterbudgeo/shared/types.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { proportionRestante } from '../proportions.js'
 import { TuileCategorie } from './TuileCategorie.js'

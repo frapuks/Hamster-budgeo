@@ -4,21 +4,14 @@ import type {
   RoleCompte,
   Sante,
   TypeCharge,
-} from '@shared/types.js'
+} from '@hamsterbudgeo/shared/types.js'
 
 /**
- * Tous les appels HTTP passent par ce module.
- *
- * Les URL sont relatives : en développement le proxy Vite les renvoie vers le serveur,
- * en production c'est le serveur lui-même qui sert les fichiers statiques. Aucune
- * question de CORS dans un cas comme dans l'autre.
+ * Tous les appels HTTP passent par ce module. Les URL sont relatives : proxy Vite en
+ * développement, même serveur en production — aucune question de CORS.
  */
-/**
- * Erreur portant le code HTTP et le message du serveur.
- *
- * Le code est nécessaire pour distinguer « non connecté » (401), qui doit renvoyer vers
- * l'écran de connexion, d'une vraie panne, qui doit afficher un message d'erreur.
- */
+/** Le code HTTP distingue « non connecté » (401), qui renvoie vers l'écran de
+ *  connexion, d'une vraie panne, qui affiche une erreur. */
 export class ErreurApi extends Error {
   constructor(
     readonly statut: number,
@@ -86,8 +79,7 @@ export interface SaisieCategorie {
 }
 
 async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: unknown): Promise<T> {
-  // Un POST part toujours avec un corps JSON, même vide : sans en-tête `Content-Type`,
-  // Fastify refuse la requête en 415 avant d'atteindre la route.
+  // Corps JSON même vide sur un POST : sans `Content-Type`, Fastify refuse en 415.
   const avecCorps = methode === 'POST' || corps !== undefined
   const reponse = await fetch(chemin, {
     method: methode,
@@ -99,13 +91,8 @@ async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: un
   return reponse.json() as Promise<T>
 }
 
-/**
- * Une dépense n'est pas attribuée à une personne : dans un foyer où tout est commun,
- * savoir qui a sorti la carte n'apporte rien à la question posée par l'application —
- * « combien reste-t-il à dépenser ? ». La colonne existe encore en base, inutilisée.
- */
 export interface NouvelleDepense {
-  /** Facultatif : laissé vide, le serveur reprend le nom du budget. */
+  /** Vide : le serveur reprend le nom du budget. */
   libelle?: string
   montantCents: number
 }

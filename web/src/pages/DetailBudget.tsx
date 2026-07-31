@@ -13,7 +13,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import { useNavigate, useParams } from 'react-router-dom'
-import { formatDate, formatEuros } from '@shared/format.js'
+import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
@@ -60,7 +60,6 @@ export function DetailBudget() {
 
   return (
     <Stack spacing={3} sx={{ pb: 2 }}>
-      {/* En-tête ------------------------------------------------------------ */}
       <Stack direction="row" alignItems="center" spacing={1.5}>
         <IconButton onClick={retour} sx={{ ml: -1 }} aria-label="Retour">
           <ArrowBackRoundedIcon />
@@ -81,7 +80,6 @@ export function DetailBudget() {
         </IconButton>
       </Stack>
 
-      {/* Anneau -------------------------------------------------------------- */}
       <Box sx={{ display: 'grid', placeItems: 'center' }}>
         <AnneauProgression
           pourcentage={proportionRestante}
@@ -99,7 +97,6 @@ export function DetailBudget() {
         Ajouter une dépense
       </Button>
 
-      {/* Dépenses du cycle ---------------------------------------------------- */}
       <Box>
         <Stack direction="row" alignItems="baseline" justifyContent="space-between" sx={{ mb: 1.5 }}>
           <Typography variant="titreSection">Dépenses du cycle</Typography>

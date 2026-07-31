@@ -12,9 +12,9 @@ import {
 } from '@mui/material'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
-import { repartir } from '@shared/calculs.js'
-import { formatEuros } from '@shared/format.js'
-import type { EtatFoyer, ModeRepartition } from '@shared/types.js'
+import { repartir } from '@hamsterbudgeo/shared/calculs.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { EtatFoyer, ModeRepartition } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
@@ -132,7 +132,6 @@ export function Repartition() {
         <Typography variant="h6">Répartition du couple</Typography>
       </Stack>
 
-      {/* Salaires ---------------------------------------------------------- */}
       <Stack direction="row" spacing={1.5}>
         {etat.personnes.map((personne, i) => (
           <CartePersonne
@@ -145,7 +144,6 @@ export function Repartition() {
         ))}
       </Stack>
 
-      {/* Total à répartir ---------------------------------------------------- */}
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="libelle" sx={{ mb: 0.75 }}>
           Charges communes du foyer
@@ -160,7 +158,6 @@ export function Repartition() {
         </Typography>
       </Box>
 
-      {/* Comparateur --------------------------------------------------------- */}
       <Stack spacing={1.5}>
         {MODES.map(({ cle, nom, explication }) => {
           const parts = repartir(cle, etat.personnes, total)

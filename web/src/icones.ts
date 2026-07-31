@@ -19,10 +19,8 @@ import type { CouleurCategorie } from './components/TuileCategorie.js'
 import { COULEURS_CATEGORIE } from './components/TuileCategorie.js'
 
 /**
- * Correspondance entre le nom d'icône stocké en base et le composant MUI.
- *
- * La base ne stocke qu'une chaîne : elle ne doit rien savoir de MUI, sans quoi
- * changer de bibliothèque d'icônes imposerait une migration de données.
+ * La base ne stocke qu'un nom : changer de bibliothèque d'icônes n'imposera aucune
+ * migration de données.
  */
 const ICONES: Record<string, SvgIconComponent> = {
   maison: HomeRoundedIcon,

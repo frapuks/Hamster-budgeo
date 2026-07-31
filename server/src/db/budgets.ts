@@ -7,13 +7,7 @@ export interface SaisieBudget {
   montantMensuelCents: number
 }
 
-/**
- * Crée un budget.
- *
- * Comme pour les charges, le compte et la catégorie sont résolus par des sous-requêtes
- * filtrées sur le foyer : un compte étranger ne produit aucune ligne, une catégorie
- * étrangère est ramenée à NULL.
- */
+/** Mêmes garde-fous par sous-requête que pour les charges. */
 export async function creerBudget(foyerId: number, saisie: SaisieBudget): Promise<boolean> {
   const lignes = await sql`
     INSERT INTO budget (compte_id, categorie_id, nom, montant_mensuel_cents, ordre)
@@ -30,12 +24,9 @@ export async function creerBudget(foyerId: number, saisie: SaisieBudget): Promis
 }
 
 /**
- * Modifie un budget.
- *
- * Les dépenses déjà saisies sont conservées, contrairement aux charges dont l'état
- * coché est remis à zéro : une dépense est un fait constaté, pas un état de suivi.
- * Baisser le plafond d'un budget déjà consommé le fait passer en dépassement, ce qui
- * est l'information juste.
+ * Les dépenses sont conservées, contrairement à l'état coché d'une charge : une dépense
+ * est un fait constaté, pas un état de suivi. Baisser le plafond d'un budget déjà
+ * consommé le fait passer en dépassement, ce qui est l'information juste.
  */
 export async function modifierBudget(
   foyerId: number,

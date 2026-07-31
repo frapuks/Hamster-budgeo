@@ -12,7 +12,7 @@ import {
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import { useNavigate } from 'react-router-dom'
-import { formatDate, formatEuros } from '@shared/format.js'
+import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { Carte } from '../components/Carte.js'
 import { CarteCompte } from '../components/CarteCompte.js'
 import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
@@ -60,7 +60,6 @@ export function Accueil() {
 
   return (
     <Stack spacing={4} sx={{ pb: 2 }}>
-      {/* Le chiffre du quotidien ------------------------------------------- */}
       <Stack alignItems="center" spacing={1.5}>
         <Box sx={{ textAlign: 'center', width: '100%' }}>
           <Typography variant="libelle" sx={{ mb: 0.75 }}>
@@ -84,7 +83,6 @@ export function Accueil() {
         />
       </Stack>
 
-      {/* Cartes de compte, en carrousel horizontal --------------------------- */}
       <Box>
         <EnTeteSection titre="Mes comptes" action={`${comptes.length} comptes`} />
         <Box
@@ -118,7 +116,6 @@ export function Accueil() {
         </Box>
       </Box>
 
-      {/* Budgets ------------------------------------------------------------ */}
       {budgets.length > 0 && (
         <Box>
           <EnTeteSection
@@ -133,7 +130,6 @@ export function Accueil() {
         </Box>
       )}
 
-      {/* Accès aux deux écrans de configuration ------------------------------ */}
       <Stack spacing={1.25}>
         <Carte onClick={() => navigate('/virements')} sx={{ cursor: 'pointer' }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -163,7 +159,6 @@ export function Accueil() {
         </Carte>
       </Stack>
 
-      {/* Nouveau cycle — discret, parce qu'irréversible ----------------------- */}
       <Button
         variant="outlined"
         fullWidth

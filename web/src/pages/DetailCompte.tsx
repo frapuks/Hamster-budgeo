@@ -15,8 +15,8 @@ import {
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { useNavigate, useParams } from 'react-router-dom'
-import { formatEuros } from '@shared/format.js'
-import type { CompteCalcule } from '@shared/types.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { LigneCharge } from '../components/LigneCharge.js'
 import { VueProvisions } from '../components/VueProvisions.js'
@@ -104,7 +104,6 @@ export function DetailCompte() {
     <Stack spacing={3} sx={{ pb: 2 }}>
       <EnTeteCompte compte={compte} onRetour={retour} />
 
-      {/* Héros -------------------------------------------------------------- */}
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="libelle" sx={{ mb: 0.75 }}>
           {mixte ? 'Il doit encore couvrir' : 'Reste à sortir'}
@@ -150,7 +149,6 @@ export function DetailCompte() {
         />
       </Box>
 
-      {/* Sélecteur, seulement si le compte porte les deux natures ------------- */}
       {mixte && (
         <ToggleButtonGroup
           exclusive
@@ -163,7 +161,6 @@ export function DetailCompte() {
         </ToggleButtonGroup>
       )}
 
-      {/* Charges ------------------------------------------------------------- */}
       {ongletActif === 'charges' &&
         (mensuelles.length === 0 ? (
           <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
@@ -196,7 +193,6 @@ export function DetailCompte() {
           </Box>
         ))}
 
-      {/* Budgets -------------------------------------------------------------- */}
       {ongletActif === 'budgets' && (
         <Stack spacing={1.25}>
           {compte.budgets.map((budget) => (

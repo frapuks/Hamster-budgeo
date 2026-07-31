@@ -1,16 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { assemblerEtat } from '@shared/calculs.js'
-import type { EtatFoyer } from '@shared/types.js'
+import { assemblerEtat } from '@hamsterbudgeo/shared/calculs.js'
+import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, type NouvelleDepense } from '../api/client.js'
 import { CLE_ETAT } from './useEtat.js'
 
 /**
- * Ajout d'une dépense.
- *
- * Pas de mise à jour optimiste ici : l'identifiant de la dépense est attribué par la
- * base, et fabriquer un identifiant provisoire côté client obligerait à le réconcilier
- * ensuite. La saisie se termine par la fermeture de la feuille, ce qui masque
- * naturellement l'aller-retour.
+ * Pas de mise à jour optimiste : l'identifiant vient de la base, et la fermeture de la
+ * feuille masque déjà l'aller-retour.
  */
 export function useAjouterDepense() {
   const queryClient = useQueryClient()
@@ -22,7 +18,6 @@ export function useAjouterDepense() {
   })
 }
 
-/** Retire une dépense d'un état et recalcule tout, avec la fonction du serveur. */
 function etatSansDepense(etat: EtatFoyer, depenseId: number): EtatFoyer {
   return assemblerEtat({
     foyer: etat.foyer,
@@ -38,12 +33,7 @@ function etatSansDepense(etat: EtatFoyer, depenseId: number): EtatFoyer {
   })
 }
 
-/**
- * Suppression d'une dépense, en optimiste.
- *
- * Contrairement à l'ajout, il n'y a rien à réconcilier : la ligne existe déjà et on la
- * retire. Elle disparaît donc immédiatement, et revient si le serveur refuse.
- */
+/** Optimiste, contrairement à l'ajout : la ligne existe déjà, il n'y a rien à réconcilier. */
 export function useSupprimerDepense() {
   const queryClient = useQueryClient()
 

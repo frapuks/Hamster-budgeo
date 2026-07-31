@@ -1,16 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
 /**
- * Retour à l'écran précédent.
+ * Retour à l'écran précédent, un même écran étant atteignable par plusieurs chemins.
  *
- * Un même écran est atteignable par plusieurs chemins : le détail d'un budget s'ouvre
- * depuis l'onglet Budgets, mais aussi depuis l'onglet Budgets d'un compte. Une
- * destination écrite en dur renverrait au mauvais endroit dans un cas sur deux.
- *
- * `location.key` vaut `'default'` uniquement sur la toute première entrée de la session
- * de navigation — page ouverte directement par son URL, ou rechargée. Dans ce cas il
- * n'y a rien derrière dans l'historique : `navigate(-1)` sortirait de l'application,
- * d'où le repli vers une destination sûre.
+ * `location.key === 'default'` signale la première entrée de la session — URL ouverte
+ * directement ou page rechargée : l'historique est vide et `navigate(-1)` sortirait de
+ * l'application, d'où le repli.
  */
 export function useRetour(secours: string) {
   const navigate = useNavigate()

@@ -1,23 +1,50 @@
+# HamsterBudgeo — pile complète.
+#
+# C'est le fichier par défaut : sur le Raspberry Pi, un `git clone` suivi de
+#
+#     docker compose up -d
+#
+# construit l'image, démarre PostgreSQL, applique les migrations et sert l'application
+# sur le port 6011. Aucun fichier de configuration à créer au préalable.
+#
+# Pour le développement local, où l'on ne veut que la base : docker-compose.dev.yml
+# (ou `npm run db:up`, qui l'utilise).
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: hamsterbudgeo-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-hamster}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hamster}
       POSTGRES_DB: ${POSTGRES_DB:-hamsterbudgeo}
       TZ: Europe/Paris
-    ports:
-      # 5433 côté hôte pour ne pas entrer en conflit avec un PostgreSQL déjà installé
-      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - hamsterbudgeo-data:/var/lib/postgresql/data
+    # Aucun port publié : la base n'est joignable que par le réseau interne de Compose.
+    # C'est ce qui rend le mot de passe par défaut acceptable — PostgreSQL n'est pas
+    # exposé au réseau domestique. À changer tout de même si le Pi héberge autre chose.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hamster} -d ${POSTGRES_DB:-hamsterbudgeo}"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        # Le serveur joue ses migrations au démarrage : il lui faut une base prête,
+        # pas seulement un conteneur lancé.
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-hamster}:${POSTGRES_PASSWORD:-hamster}@db:5432/${POSTGRES_DB:-hamsterbudgeo}
+      # À passer à `true` le jour où l'application est servie en HTTPS : le cookie de
+      # session devient alors `secure`. En HTTP, cela empêcherait toute connexion.
+      HTTPS: ${HTTPS:-false}
+    ports:
+      - "${APP_PORT:-6011}:3001"
 
 volumes:
   hamsterbudgeo-data:

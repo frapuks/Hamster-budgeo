@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Drawer, Stack, TextField, Typography } from '@mui/material'
-import { formatEuros } from '@shared/format.js'
-import type { BudgetCalcule } from '@shared/types.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { BudgetCalcule } from '@hamsterbudgeo/shared/types.js'
 import { useAjouterDepense } from '../hooks/useDepenses.js'
 import { PaveNumerique } from './PaveNumerique.js'
 import { TuileCategorie } from './TuileCategorie.js'
 import { couleurDe, iconeDe } from '../icones.js'
 
 /**
- * Feuille de saisie d'une dépense.
- *
- * Le budget est fixé par l'écran d'où l'on vient et n'est pas modifiable ici : on
- * ouvre la feuille depuis « Essence », on saisit une dépense d'essence. Proposer de
- * basculer vers « Restaurants » au moment de valider n'ouvre la porte qu'aux erreurs.
+ * Le budget est fixé par l'écran d'où l'on vient et n'est pas modifiable ici : proposer
+ * d'en changer au moment de valider n'ouvrirait la porte qu'aux erreurs.
  */
 export function FeuilleDepense({
   ouverte,
@@ -27,8 +24,8 @@ export function FeuilleDepense({
   const [libelle, setLibelle] = useState('')
   const ajouter = useAjouterDepense()
 
-  // Réinitialisation à chaque ouverture : une feuille qui rouvre avec les valeurs
-  // précédentes conduit à enregistrer deux fois la même dépense sans s'en apercevoir.
+  // Réinitialiser à chaque ouverture : sinon la feuille rouvre avec les valeurs
+  // précédentes et la même dépense est enregistrée deux fois sans qu'on le voie.
   useEffect(() => {
     if (ouverte) {
       setMontantCents(0)
@@ -36,9 +33,7 @@ export function FeuilleDepense({
     }
   }, [ouverte])
 
-  // Seul le montant est obligatoire : le libellé vide sera remplacé par le nom du
-  // budget côté serveur. Une dépense d'essence s'appelle « Essence », c'est suffisant
-  // et ça évite d'imposer une saisie de plus à la pompe.
+  // Seul le montant est obligatoire : un libellé vide prend le nom du budget.
   const valide = montantCents > 0
 
   const enregistrer = () => {

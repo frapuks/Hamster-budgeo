@@ -13,50 +13,38 @@ import type {
 } from './types.js'
 
 /**
- * Le cœur métier de HamsterBudgeo.
- *
- * Fonctions pures, sans accès base, utilisées à l'identique par le serveur et le
- * front. Toutes travaillent en CENTIMES entiers ; aucune ne renvoie de décimale.
+ * Cœur métier : fonctions pures, sans accès base, utilisées à l'identique par le
+ * serveur et le front. Tout est en centimes entiers.
  */
 
-// ── Le lissé : la parade au piège du montant ─────────────────────────────────
-
 /**
- * Contribution mensuelle d'une charge.
- *
- * ⚠️ C'est LA fonction à utiliser partout. `charge.montantCents` ne doit jamais être
- * additionné directement : il vaut un montant mensuel pour une charge mensuelle, mais
- * un montant ANNUEL pour une charge annuelle. Additionner les deux donne un résultat
- * faux d'un facteur 12, sans que rien ne plante.
+ * ⚠️ Seule façon autorisée de convertir une charge en contribution mensuelle.
+ * `charge.montantCents` vaut un montant mensuel pour une charge mensuelle, mais un
+ * montant ANNUEL pour une charge annuelle : l'additionner directement donne un
+ * résultat faux d'un facteur 12, sans que rien ne plante.
  */
 export function coutMensuelLisse(charge: Pick<Charge, 'type' | 'montantCents'>): number {
   return charge.type === 'mensuelle' ? charge.montantCents : Math.round(charge.montantCents / 12)
 }
 
-// ── Charges d'un compte ──────────────────────────────────────────────────────
-
 const estActiveMensuelle = (c: Charge) => c.actif && c.type === 'mensuelle'
 
-/** Somme des charges mensuelles actives, cochées ou non. */
 export function totalDuCycle(charges: Charge[]): number {
   return charges.filter(estActiveMensuelle).reduce((s, c) => s + c.montantCents, 0)
 }
 
-/** Somme des charges mensuelles actives déjà cochées. */
 export function dejaPreleve(charges: Charge[]): number {
   return charges
     .filter((c) => estActiveMensuelle(c) && c.estPrelevee)
     .reduce((s, c) => s + c.montantCents, 0)
 }
 
-/** Le chiffre roi : ce qui doit encore sortir du compte d'ici la fin du cycle. */
 export function resteASortir(charges: Charge[]): number {
   return charges
     .filter((c) => estActiveMensuelle(c) && !c.estPrelevee)
     .reduce((s, c) => s + c.montantCents, 0)
 }
 
-/** Part des charges annuelles dans le virement permanent d'un compte. */
 export function provisionMensuelle(charges: Charge[]): number {
   return charges
     .filter((c) => c.actif && c.type === 'annuelle')
@@ -64,12 +52,8 @@ export function provisionMensuelle(charges: Charge[]): number {
 }
 
 /**
- * Montant total des charges annuelles sur douze mois.
- *
- * C'est le seul endroit de l'application où l'on additionne des `montantCents` sans
- * lissage — et c'est légitime, puisqu'on ne somme que des charges annuelles, toutes
- * exprimées dans la même unité. Répond à « combien cette réserve couvre-t-elle dans
- * l'année ? », alors que provisionMensuelle() répond à « combien virer ce mois-ci ? ».
+ * Seul endroit où des `montantCents` sont additionnés sans lissage — légitime, puisque
+ * seules des charges annuelles sont sommées, toutes dans la même unité.
  */
 export function totalAnnuel(charges: Charge[]): number {
   return charges
@@ -77,37 +61,26 @@ export function totalAnnuel(charges: Charge[]): number {
     .reduce((s, c) => s + c.montantCents, 0)
 }
 
-// ── Budgets ──────────────────────────────────────────────────────────────────
-
 export function totalDepense(budget: Budget): number {
   return budget.depenses.reduce((s, d) => s + d.montantCents, 0)
 }
 
-/** Peut être négatif : c'est un dépassement, une information utile, pas une erreur. */
+/** Peut être négatif : c'est un dépassement, pas une anomalie. */
 export function resteADepenser(budget: Budget): number {
   return budget.montantMensuelCents - totalDepense(budget)
 }
 
-// ── Agrégats d'un compte ─────────────────────────────────────────────────────
-
-/**
- * Montant du virement permanent : la somme des coûts mensuels lissés et des budgets.
- * C'est le nombre stable à recopier une fois dans l'application bancaire.
- */
+/** Le montant stable à recopier une fois dans l'application bancaire. */
 export function virementPermanent(charges: Charge[], budgets: Budget[]): number {
   const chargesLissees = charges
     .filter((c) => c.actif)
     .reduce((s, c) => s + coutMensuelLisse(c), 0)
-  const budgetes = budgets.reduce((s, b) => s + b.montantMensuelCents, 0)
-  return chargesLissees + budgetes
+  return chargesLissees + budgets.reduce((s, b) => s + b.montantMensuelCents, 0)
 }
 
-/** Ce que le compte doit encore couvrir : prélèvements restants + budgets restants. */
 export function besoinDuCycle(charges: Charge[], budgets: Budget[]): number {
   return resteASortir(charges) + budgets.reduce((s, b) => s + resteADepenser(b), 0)
 }
-
-// ── Enrichissement ───────────────────────────────────────────────────────────
 
 export function calculerCharge(charge: Charge): ChargeCalculee {
   return { ...charge, coutMensuelLisseCents: coutMensuelLisse(charge) }
@@ -121,8 +94,6 @@ export function calculerBudget(budget: Budget): BudgetCalcule {
   }
 }
 
-// ── Assemblage de l'état complet ─────────────────────────────────────────────
-
 export interface CompteBrut {
   id: number
   nom: string
@@ -135,12 +106,11 @@ export interface CompteBrut {
 }
 
 /**
- * Assemble l'état complet du foyer à partir des données brutes.
+ * Assemble l'état complet du foyer.
  *
- * Volontairement unique et partagée : le serveur l'appelle après ses requêtes SQL, et
- * le front la rappelle pour ses mises à jour optimistes. Deux chemins d'agrégation
- * distincts finiraient par diverger, et l'écart serait invisible — un compte afficherait
- * un total juste, l'accueil un total faux.
+ * Appelée par le serveur après ses requêtes SQL et par le front pour ses mises à jour
+ * optimistes : deux chemins d'agrégation distincts finiraient par diverger, et l'écart
+ * serait invisible — un écran afficherait un total juste, l'autre un total faux.
  */
 export function assemblerEtat(brut: {
   foyer: EtatFoyer['foyer']
@@ -192,17 +162,13 @@ export function assemblerEtat(brut: {
   }
 }
 
-// ── Répartition dans le couple ───────────────────────────────────────────────
-
 /**
- * Répartit `totalCents` entre deux personnes selon le mode choisi.
+ * Répartit `totalCents` entre les personnes du foyer.
  *
- * La base de calcul est toujours le LISSÉ (la somme des virements permanents), jamais
- * les montants réels du cycle : sinon la part de chacun varierait d'un mois à l'autre,
- * ce qui est incompatible avec un virement permanent.
- *
- * La part de la dernière personne est obtenue par soustraction, pour que la somme des
- * parts égale exactement le total même quand les arrondis tombent mal.
+ * La base est toujours le lissé, jamais le réel du cycle : sinon la part de chacun
+ * varierait d'un mois à l'autre, ce qui est incompatible avec un virement permanent.
+ * La dernière part est obtenue par soustraction pour que la somme égale exactement le
+ * total, même quand les arrondis tombent mal.
  */
 export function repartir(
   mode: ModeRepartition,
@@ -222,7 +188,6 @@ export function repartir(
           ? Math.round(totalCents / personnes.length)
           : Math.round((totalCents * p.salaireNetCents) / revenus)
       case 'reste_a_vivre_egal': {
-        // Chacun garde le même reste à vivre : p = (C + revenu − revenus des autres) / n
         const autres = revenus - p.salaireNetCents
         const n = personnes.length
         return Math.round((totalCents + (n - 1) * p.salaireNetCents - autres) / n)
@@ -235,7 +200,6 @@ export function repartir(
   }
 
   const parts = personnes.map(partBrute)
-  // Le reliquat d'arrondi va sur la dernière part : la somme est exacte par construction.
   const sommeSaufDerniere = parts.slice(0, -1).reduce((s, v) => s + v, 0)
   parts[parts.length - 1] = totalCents - sommeSaufDerniere
 

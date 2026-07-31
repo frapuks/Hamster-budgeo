@@ -11,7 +11,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
-import type { CompteCalcule, EtatFoyer, RoleCompte } from '@shared/types.js'
+import type { CompteCalcule, EtatFoyer, RoleCompte } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { CLE_ETAT } from '../hooks/useEtat.js'
 import { COULEURS_CATEGORIE, type CouleurCategorie } from './TuileCategorie.js'

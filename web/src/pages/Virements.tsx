@@ -14,7 +14,7 @@ import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
 import { useNavigate } from 'react-router-dom'
-import { formatEuros } from '@shared/format.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { Carte } from '../components/Carte.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
@@ -84,7 +84,6 @@ export function Virements() {
         </Box>
       </Stack>
 
-      {/* Ce que chacun vire -------------------------------------------------- */}
       <Box>
         <Stack direction="row" alignItems="baseline" justifyContent="space-between" sx={{ mb: 1.25 }}>
           <Typography variant="libelle">Ce que chacun vire</Typography>
@@ -121,7 +120,6 @@ export function Virements() {
         </Stack>
       </Box>
 
-      {/* Ce que reçoit chaque compte ------------------------------------------ */}
       <Box>
         <Typography variant="libelle" sx={{ mb: 1.25 }}>
           Ce que reçoit chaque compte
@@ -162,7 +160,6 @@ export function Virements() {
         </Stack>
       </Box>
 
-      {/* L'explication qui évite la question « d'où sort ce chiffre ? » -------- */}
       <Box
         sx={{
           borderRadius: `${RAYONS.tuile}px`,

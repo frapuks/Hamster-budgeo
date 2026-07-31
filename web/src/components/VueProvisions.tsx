@@ -1,8 +1,8 @@
 import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
-import { totalAnnuel } from '@shared/calculs.js'
-import { formatEuros } from '@shared/format.js'
-import type { CompteCalcule } from '@shared/types.js'
+import { totalAnnuel } from '@hamsterbudgeo/shared/calculs.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { Carte } from './Carte.js'
 import { TuileCategorie } from './TuileCategorie.js'
@@ -22,7 +22,6 @@ export function VueProvisions({ compte }: { compte: CompteCalcule }) {
 
   return (
     <Stack spacing={3}>
-      {/* Héros : le seul chiffre qui compte ici --------------------------- */}
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="libelle" sx={{ mb: 0.75 }}>
           Virement permanent
@@ -41,7 +40,6 @@ export function VueProvisions({ compte }: { compte: CompteCalcule }) {
         />
       </Box>
 
-      {/* Détail des provisions -------------------------------------------- */}
       <Box>
         <Typography variant="titreSection" sx={{ mb: 1.5 }}>
           Ce que ça provisionne

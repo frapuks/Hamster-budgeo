@@ -13,7 +13,6 @@ import {
 } from './calculs.js'
 import type { Budget, Charge, Personne } from './types.js'
 
-// ── Fabriques ────────────────────────────────────────────────────────────────
 
 let compteur = 0
 function charge(p: Partial<Charge> = {}): Charge {
@@ -56,7 +55,6 @@ const personne = (id: number, prenom: string, salaireNetCents: number): Personne
   couleur: 'bleu',
 })
 
-// ── Le piège du montant ──────────────────────────────────────────────────────
 
 describe('coutMensuelLisse — la parade au facteur 12', () => {
   it('laisse une charge mensuelle inchangée', () => {
@@ -84,7 +82,6 @@ describe('coutMensuelLisse — la parade au facteur 12', () => {
   })
 })
 
-// ── Charges d'un compte ──────────────────────────────────────────────────────
 
 describe('agrégats de charges', () => {
   const compteCM = [
@@ -99,7 +96,7 @@ describe('agrégats de charges', () => {
     charge({ nom: 'Impôt sur le revenu', montantCents: 24437 }),
   ]
 
-  it('reproduit le compte prélèvements de la spec', () => {
+  it('additionne, coche et soustrait correctement', () => {
     expect(totalDuCycle(compteCM)).toBe(145876)
     expect(dejaPreleve(compteCM)).toBe(20721)
     expect(resteASortir(compteCM)).toBe(125155)
@@ -131,11 +128,11 @@ describe('compte de provisions', () => {
     charge({ nom: 'Ramonage', type: 'annuelle', montantCents: 12000, jourPrelevement: null }),
   ]
 
-  it('reproduit le virement mensuel de la spec', () => {
+  it('calcule le virement mensuel', () => {
     expect(provisionMensuelle(provisions)).toBe(12250)
   })
 
-  it('reproduit le total annuel couvert', () => {
+  it('calcule le total annuel couvert', () => {
     expect(totalAnnuel(provisions)).toBe(147000)
   })
 
@@ -158,7 +155,6 @@ describe('compte de provisions', () => {
   })
 })
 
-// ── Budgets ──────────────────────────────────────────────────────────────────
 
 describe('budgets', () => {
   it('calcule le reste à dépenser', () => {
@@ -174,7 +170,6 @@ describe('budgets', () => {
   })
 })
 
-// ── Virement permanent ───────────────────────────────────────────────────────
 
 describe('virementPermanent', () => {
   it('additionne les charges lissées et les budgets', () => {
@@ -230,7 +225,6 @@ describe('besoinDuCycle', () => {
   })
 })
 
-// ── Répartition dans le couple ───────────────────────────────────────────────
 
 describe('repartir', () => {
   const helene = personne(1, 'Hélène', 280000)

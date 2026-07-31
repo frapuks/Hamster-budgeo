@@ -1,16 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { assemblerEtat } from '@shared/calculs.js'
-import type { EtatFoyer } from '@shared/types.js'
+import { assemblerEtat } from '@hamsterbudgeo/shared/calculs.js'
+import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { CLE_ETAT } from './useEtat.js'
 
 /**
- * Applique un cochage à un état existant et recalcule tous les agrégats.
- *
- * Le point clé : on rappelle `assemblerEtat`, exactement la fonction qu'utilise le
- * serveur. La mise à jour optimiste ne peut donc pas produire des chiffres différents
- * de ceux qui arriveront dans la réponse — sinon l'interface « sauterait » au retour
- * du serveur, et le doute s'installerait sur le bon total.
+ * Recalcule avec `assemblerEtat`, la fonction même du serveur : la mise à jour optimiste
+ * ne peut donc pas produire des chiffres différents de la réponse à venir.
  */
 function etatApresCochage(etat: EtatFoyer, chargeId: number, estPrelevee: boolean): EtatFoyer {
   return assemblerEtat({
@@ -25,11 +21,8 @@ function etatApresCochage(etat: EtatFoyer, chargeId: number, estPrelevee: boolea
 }
 
 /**
- * Coche ou décoche une charge, avec bascule immédiate de l'interface.
- *
- * Sur un téléphone, l'aller-retour réseau se voit : sans mise à jour optimiste, la
- * case resterait vide un instant après le clic et donnerait l'impression d'un raté.
- * En cas d'échec, l'état précédent est restauré.
+ * Bascule immédiate : sans elle, la case resterait vide le temps de l'aller-retour
+ * réseau et donnerait l'impression d'un raté. L'état précédent revient en cas d'échec.
  */
 export function useCocherCharge() {
   const queryClient = useQueryClient()
@@ -39,7 +32,7 @@ export function useCocherCharge() {
       api.cocherCharge(id, estPrelevee),
 
     onMutate: async ({ id, estPrelevee }) => {
-      // Sans cette annulation, une lecture en vol pourrait écraser la bascule optimiste.
+      // Sans annulation, une lecture en vol écraserait la bascule optimiste.
       await queryClient.cancelQueries({ queryKey: CLE_ETAT })
       const precedent = queryClient.getQueryData<EtatFoyer>(CLE_ETAT)
       if (precedent) {

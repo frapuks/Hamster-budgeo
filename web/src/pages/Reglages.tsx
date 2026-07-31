@@ -19,8 +19,8 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
 import { useNavigate } from 'react-router-dom'
-import { formatDate, formatEuros } from '@shared/format.js'
-import type { CompteCalcule, EtatFoyer } from '@shared/types.js'
+import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
@@ -107,7 +107,6 @@ export function Reglages() {
     <Stack spacing={3} sx={{ pb: 2 }}>
       <Typography variant="titreSection">Réglages</Typography>
 
-      {/* Foyer -------------------------------------------------------------- */}
       <Section titre="Foyer">
         <Carte onClick={() => navigate('/repartition')} sx={{ cursor: 'pointer', p: 1.75 }}>
           <Stack spacing={1}>
@@ -130,7 +129,6 @@ export function Reglages() {
         </Carte>
       </Section>
 
-      {/* Comptes ------------------------------------------------------------ */}
       <Section titre="Comptes bancaires">
         <Stack spacing={1.25}>
           {etat.comptes.map((compte, index) => (
@@ -200,7 +198,6 @@ export function Reglages() {
         </Stack>
       </Section>
 
-      {/* Catégories --------------------------------------------------------- */}
       <Section titre={`Catégories (${etat.categories.length})`}>
         <Carte sx={{ p: 1.75 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -217,7 +214,6 @@ export function Reglages() {
         </Carte>
       </Section>
 
-      {/* Cycle -------------------------------------------------------------- */}
       <Section titre="Cycle">
         <Carte sx={{ p: 1.75 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -232,7 +228,6 @@ export function Reglages() {
         </Carte>
       </Section>
 
-      {/* Compte ------------------------------------------------------------- */}
       <Section titre="Mon compte">
         <Stack spacing={1.25}>
           <Button
@@ -277,7 +272,6 @@ export function Reglages() {
         </Stack>
       </Section>
 
-      {/* Données ------------------------------------------------------------ */}
       <Section titre="Données">
         <Stack spacing={1.25}>
           <Button variant="outlined" fullWidth onClick={() => setConfirmationDemo(true)}>

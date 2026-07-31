@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import type { Sante } from '@shared/types.js'
+import type { Sante } from '@hamsterbudgeo/shared/types.js'
 import { baseRepond } from '../db/client.js'
 
 export async function routesSante(app: FastifyInstance) {

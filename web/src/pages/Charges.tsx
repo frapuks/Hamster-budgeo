@@ -9,9 +9,9 @@ import {
   Typography,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { coutMensuelLisse } from '@shared/calculs.js'
-import { formatEuros } from '@shared/format.js'
-import type { ChargeCalculee, CompteCalcule } from '@shared/types.js'
+import { coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { ChargeCalculee, CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { BoutonFlottant } from '../components/BoutonFlottant.js'
 import { Carte } from '../components/Carte.js'
 import { PuceType } from '../components/PuceType.js'

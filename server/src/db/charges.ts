@@ -1,4 +1,4 @@
-import type { TypeCharge } from '@shared/types.js'
+import type { TypeCharge } from '@hamsterbudgeo/shared/types.js'
 import { sql } from './client.js'
 
 export interface SaisieCharge {
@@ -12,12 +12,9 @@ export interface SaisieCharge {
 }
 
 /**
- * Normalise une saisie avant écriture.
- *
- * Une charge annuelle est provisionnée, jamais cochée : elle n'a ni jour de
- * prélèvement ni état. La contrainte `charge_annuelle_sans_suivi` le refuserait en
- * base, mais mieux vaut nettoyer ici que renvoyer une erreur SQL à l'utilisateur qui
- * bascule simplement le type d'une charge existante.
+ * Une charge annuelle est provisionnée, jamais cochée : ni jour de prélèvement ni état.
+ * La contrainte SQL le refuserait, mais mieux vaut nettoyer ici que renvoyer une erreur
+ * de base à qui bascule simplement le type d'une charge.
  */
 function normaliser(saisie: SaisieCharge) {
   return {
@@ -28,17 +25,8 @@ function normaliser(saisie: SaisieCharge) {
 }
 
 /**
- * Coche ou décoche une charge mensuelle.
- *
- * Le `foyerId` fait partie de la clause WHERE et n'est pas une simple vérification
- * préalable : une charge d'un autre foyer ne peut pas être atteinte, même si son
- * identifiant est deviné. Le middleware du lot 11 remplira ce paramètre depuis la
- * session ; d'ici là il vient du foyer courant.
- *
- * Le filtre `type = 'mensuelle'` reflète la règle métier : une charge annuelle est
- * provisionnée, jamais cochée. La contrainte SQL `charge_annuelle_sans_suivi` le
- * garantit aussi côté base — ceci n'est qu'un garde-fou de plus, qui produit une
- * erreur 404 lisible plutôt qu'une violation de contrainte.
+ * Le `foyerId` est dans la clause WHERE, pas dans une vérification préalable : une
+ * charge d'un autre foyer est inatteignable même si son identifiant est deviné.
  */
 export async function cocherCharge(
   foyerId: number,
@@ -59,11 +47,8 @@ export async function cocherCharge(
 }
 
 /**
- * Crée une charge.
- *
- * Le compte et la catégorie sont résolus par des sous-requêtes filtrées sur le foyer :
- * un compte étranger ne produit aucune ligne (donc aucune création), et une catégorie
- * étrangère est ramenée à NULL au lieu d'être enregistrée.
+ * Compte et catégorie résolus par des sous-requêtes filtrées sur le foyer : un compte
+ * étranger ne produit aucune ligne, une catégorie étrangère est ramenée à NULL.
  */
 export async function creerCharge(foyerId: number, saisie: SaisieCharge): Promise<boolean> {
   const c = normaliser(saisie)
@@ -80,11 +65,8 @@ export async function creerCharge(foyerId: number, saisie: SaisieCharge): Promis
 }
 
 /**
- * Modifie une charge.
- *
- * L'état coché est remis à faux : changer le montant, le type ou le compte d'une charge
- * déjà cochée rendrait son état ambigu — le prélèvement passé ne correspond plus à ce
- * qui est décrit. Repartir de « à venir » est le comportement le moins surprenant.
+ * L'état coché repart à faux : après un changement de montant ou de type, le
+ * prélèvement passé ne correspond plus à ce qui est décrit.
  */
 export async function modifierCharge(
   foyerId: number,

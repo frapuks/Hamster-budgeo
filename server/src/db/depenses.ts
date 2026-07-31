@@ -9,18 +9,11 @@ export interface NouvelleDepense {
 }
 
 /**
- * Ajoute une dépense à un budget.
+ * L'appartenance au foyer passe par la jointure : un budget étranger ne produit aucune
+ * ligne, donc aucune insertion.
  *
- * L'appartenance au foyer est vérifiée par la jointure du SELECT, pas par une requête
- * préalable : un budget d'un autre foyer ne produit simplement aucune ligne, donc
- * aucune insertion. Impossible d'écrire chez le voisin en devinant un identifiant.
- *
- * `personne_id` passe par une sous-requête filtrée sur le foyer : une personne
- * étrangère est ramenée à NULL au lieu d'être enregistrée telle quelle.
- *
- * Le libellé est facultatif : vide, il prend le nom du budget. Le repli se fait en SQL
- * plutôt que dans le code appelant, parce que le nom du budget est déjà dans la
- * jointure — inutile de le relire d'abord, et la règle vaut pour tout appelant.
+ * Libellé vide : le nom du budget est repris. Le repli se fait en SQL parce que ce nom
+ * est déjà dans la jointure, et que la règle vaut alors pour tout appelant.
  */
 export async function ajouterDepense(
   foyerId: number,
@@ -42,7 +35,7 @@ export async function ajouterDepense(
   return lignes.length > 0
 }
 
-/** Supprime une dépense du cycle courant. Même garde-fou par jointure. */
+/** Même garde-fou par jointure. */
 export async function supprimerDepense(foyerId: number, depenseId: number): Promise<boolean> {
   const lignes = await sql`
     DELETE FROM depense d

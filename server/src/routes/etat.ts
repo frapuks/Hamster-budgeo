@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import type { EtatFoyer } from '@shared/types.js'
+import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { lireEtat } from '../db/etat.js'
 import { foyerDeLaRequete } from '../contexte.js'
 

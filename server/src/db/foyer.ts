@@ -1,12 +1,7 @@
-import type { ModeRepartition } from '@shared/types.js'
+import type { ModeRepartition } from '@hamsterbudgeo/shared/types.js'
 import { sql } from './client.js'
 
-/**
- * Enregistre le salaire net mensuel d'une personne.
- *
- * Le `foyer_id` est dans la clause WHERE : une personne d'un autre foyer est
- * inatteignable même si son identifiant est deviné.
- */
+/** `foyer_id` dans la clause WHERE : une personne d'un autre foyer est inatteignable. */
 export async function modifierSalaire(
   foyerId: number,
   personneId: number,
@@ -22,10 +17,8 @@ export async function modifierSalaire(
 }
 
 /**
- * Choisit le mode de répartition du foyer.
- *
- * Le mode ne change aucun montant : il ne fait que redistribuer un total déjà connu
- * entre les deux personnes. C'est pour ça qu'il vit sur le foyer et non sur les charges.
+ * Le mode ne change aucun montant, il redistribue un total déjà connu : d'où sa place
+ * sur le foyer plutôt que sur les charges.
  */
 export async function definirModeRepartition(
   foyerId: number,

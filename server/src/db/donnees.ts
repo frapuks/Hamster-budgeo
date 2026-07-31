@@ -1,11 +1,8 @@
 import { sql } from './client.js'
 
 /**
- * Vide le foyer de son contenu, sans le détruire.
- *
- * Les comptes partent en cascade avec leurs charges, budgets et dépenses. Le foyer et
- * les personnes survivent : effacer ses comptes ne doit pas obliger à ressaisir les
- * prénoms et les salaires, qui n'ont rien à voir avec la structure budgétaire.
+ * Vide le contenu budgétaire du foyer. Les personnes et leurs salaires survivent :
+ * effacer ses comptes ne doit pas obliger à les ressaisir.
  */
 export async function viderFoyer(foyerId: number): Promise<void> {
   await sql.begin(async (tx) => {

@@ -16,9 +16,9 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { useParams } from 'react-router-dom'
-import { coutMensuelLisse } from '@shared/calculs.js'
-import { formatEuros } from '@shared/format.js'
-import type { TypeCharge } from '@shared/types.js'
+import { coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { TypeCharge } from '@hamsterbudgeo/shared/types.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { PaveNumerique } from '../components/PaveNumerique.js'
@@ -97,7 +97,6 @@ export function FormulaireCharge() {
         <Typography variant="h6">{edition ? 'Modifier la charge' : 'Nouvelle charge'}</Typography>
       </Stack>
 
-      {/* Type — c'est lui qui donne son sens au montant --------------------- */}
       <ToggleButtonGroup
         exclusive
         fullWidth
@@ -108,7 +107,6 @@ export function FormulaireCharge() {
         <ToggleButton value="annuelle">Une fois par an</ToggleButton>
       </ToggleButtonGroup>
 
-      {/* Montant, avec son unité juste dessous ------------------------------ */}
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="montantHero" sx={{ opacity: montantCents === 0 ? 0.35 : 1 }}>
           {formatEuros(montantCents)}
@@ -146,7 +144,6 @@ export function FormulaireCharge() {
         ))}
       </TextField>
 
-      {/* Catégorie --------------------------------------------------------- */}
       <Box>
         <Typography variant="libelle" sx={{ mb: 1 }}>
           Catégorie
@@ -177,7 +174,6 @@ export function FormulaireCharge() {
         </Box>
       </Box>
 
-      {/* Jour de prélèvement, sans objet sur une charge annuelle ------------- */}
       {type === 'mensuelle' && (
         <Box>
           <Typography variant="libelle" sx={{ mb: 1 }}>
@@ -200,7 +196,6 @@ export function FormulaireCharge() {
         </Box>
       )}
 
-      {/* Ce que ça change concrètement --------------------------------------- */}
       <Carte sx={{ borderLeft: `3px solid ${COULEURS.bleu}` }}>
         <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
           {type === 'annuelle'

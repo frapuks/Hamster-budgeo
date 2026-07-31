@@ -2,15 +2,11 @@ import { Box, Typography } from '@mui/material'
 import { COULEURS } from '../theme.js'
 
 /**
- * Anneau de progression avec valeur au centre.
+ * `pourcentage` est toujours ce qui RESTE : l'anneau part plein et se vide, comme le
+ * montant qu'il entoure.
  *
- * Convention de l'application : `pourcentage` est toujours **ce qui reste**, jamais ce
- * qui est consommé. L'anneau part donc plein et se vide, ce qui met en image le chiffre
- * affiché au centre — un anneau qui se remplirait pendant que le montant central
- * diminue enverrait deux signaux contraires.
- *
- * Écrit en SVG plutôt qu'avec CircularProgress : on maîtrise l'épaisseur du trait, les
- * extrémités arrondies et le point de départ (12 h), ce que MUI ne permet pas proprement.
+ * En SVG plutôt qu'avec CircularProgress, pour maîtriser l'épaisseur du trait, les
+ * extrémités arrondies et le départ à midi.
  */
 export function AnneauProgression({
   pourcentage,

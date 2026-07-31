@@ -1,6 +1,6 @@
 import { Alert, Box, Divider, Skeleton, Stack, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { formatEuros } from '@shared/format.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { BoutonFlottant } from '../components/BoutonFlottant.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { useEtat } from '../hooks/useEtat.js'

@@ -3,14 +3,10 @@ import BackspaceRoundedIcon from '@mui/icons-material/BackspaceRounded'
 import { RAYONS } from '../theme.js'
 
 /**
- * Pavé numérique de saisie d'un montant.
- *
- * Il ne manipule que des CENTIMES entiers : chaque touche décale la valeur d'un rang
- * (`cents * 10 + chiffre`), exactement comme un terminal de paiement. Aucune chaîne
- * n'est jamais convertie en nombre à virgule, donc aucun arrondi ne peut se glisser
- * entre ce qui est tapé et ce qui est enregistré.
- *
- * Effet de bord voulu : on tape « 7 8 0 0 » pour 78,00 €, jamais de virgule à placer.
+ * Ne manipule que des centimes entiers : chaque touche décale la valeur d'un rang,
+ * comme un terminal de paiement. Aucune chaîne n'est convertie en nombre à virgule,
+ * donc aucun arrondi entre ce qui est tapé et ce qui est enregistré. On tape
+ * « 7 8 0 0 » pour 78,00 €.
  */
 const TOUCHES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'effacer'] as const
 

@@ -12,8 +12,8 @@ import {
   Typography,
 } from '@mui/material'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
-import { formatEuros } from '@shared/format.js'
-import type { EtatFoyer } from '@shared/types.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { useParams } from 'react-router-dom'
 import { api, type SaisieBudget } from '../api/client.js'
 import { Carte } from '../components/Carte.js'

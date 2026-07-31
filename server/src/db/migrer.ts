@@ -4,13 +4,14 @@ import { join } from 'node:path'
 import { sql } from './client.js'
 
 /**
- * Runner de migrations.
- *
  * Applique dans l'ordre alphabétique les fichiers `migrations/*.sql` non encore joués,
- * chacun dans sa propre transaction. Une migration qui échoue est annulée entièrement
- * et interrompt la suite : la base ne reste jamais à moitié migrée.
+ * chacun dans sa propre transaction : la base ne reste jamais à moitié migrée.
+ *
+ * Le dossier est paramétrable parce que l'arborescence compilée diffère de celle des
+ * sources — l'image Docker le fixe par variable d'environnement.
  */
-const DOSSIER = fileURLToPath(new URL('../../migrations', import.meta.url))
+const DOSSIER =
+  process.env.MIGRATIONS_DIR ?? fileURLToPath(new URL('../../migrations', import.meta.url))
 
 export async function migrer(): Promise<string[]> {
   await sql`

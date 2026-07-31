@@ -12,7 +12,7 @@
     "noEmit": true,
     "types": ["vite/client"],
     "paths": {
-      "@shared/*": ["../shared/src/*"]
+      "@hamsterbudgeo/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "../shared/src/**/*.ts"]

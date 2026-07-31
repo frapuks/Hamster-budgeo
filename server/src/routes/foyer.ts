@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import type { ModeRepartition } from '@shared/types.js'
+import type { ModeRepartition } from '@hamsterbudgeo/shared/types.js'
 import { lireEtat } from '../db/etat.js'
 import { foyerDeLaRequete } from '../contexte.js'
 import { definirModeRepartition, modifierSalaire } from '../db/foyer.js'

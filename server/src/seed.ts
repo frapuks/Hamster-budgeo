@@ -2,18 +2,14 @@ import { fileURLToPath } from 'node:url'
 import { sql } from './db/client.js'
 
 /**
- * Jeu de données de démonstration.
+ * Jeu de démonstration.
  *
- * Reprend au centime près le jeu de la spec (§7 du plan). Il sert trois usages :
- * l'onboarding au premier lancement, la fixture de développement, et le jeu
- * d'assertions des tests — d'où l'importance que les totaux tombent juste.
- *
- * Totaux attendus :
- *   • Compte prélèvements : 1 458,76 € · coché 207,21 € · reste 1 251,55 €
- *   • Compte carte        :   115,25 € · coché  14,98 € · reste   100,27 €
- *   • Budgets             : 1 170,00 € · dépensé 712,00 € · restant 458,00 €
- *   • Provisions          : 1 470,00 €/an · 122,50 €/mois
- *   • Virements permanents: 1 458,76 + 1 285,25 + 122,50 = 2 866,51 €/mois
+ * Totaux attendus, qui servent aussi de repères de vérification :
+ *   Compte prélèvements : 1 289,42 € · coché 176,89 € · reste 1 112,53 €
+ *   Compte carte        :    94,98 € · coché  13,98 € · reste    81,00 €
+ *   Budgets             :   950,00 € · dépensé 586,70 € · restant 363,30 €
+ *   Provisions          : 1 272,00 €/an · 106,00 €/mois
+ *   Virements permanents: 1 289,42 + 1 044,98 + 106,00 = 2 440,40 €/mois
  */
 
 const CATEGORIES = [
@@ -37,70 +33,70 @@ const CATEGORIES = [
 type NomCategorie = (typeof CATEGORIES)[number]['nom']
 
 const CHARGES_PRELEVEMENTS = [
-  { nom: 'Netflix', cents: 1349, jour: 2, prelevee: true, cat: 'Abonnements' },
-  { nom: 'EDF', cents: 9640, jour: 5, prelevee: true, cat: 'Énergie' },
-  { nom: 'Mutuelle', cents: 9732, jour: 8, prelevee: true, cat: 'Santé' },
-  { nom: 'Loyer', cents: 85000, jour: 10, prelevee: false, cat: 'Logement' },
-  { nom: 'Assurance habitation', cents: 3490, jour: 12, prelevee: false, cat: 'Assurance' },
-  { nom: 'Internet', cents: 3999, jour: 15, prelevee: false, cat: 'Télécom' },
-  { nom: 'Téléphone', cents: 1999, jour: 18, prelevee: false, cat: 'Télécom' },
-  { nom: 'Assurance auto', cents: 6230, jour: 20, prelevee: false, cat: 'Assurance' },
-  { nom: 'Impôt sur le revenu', cents: 24437, jour: 25, prelevee: false, cat: 'Impôts' },
+  { nom: 'Abonnement TV', cents: 1199, jour: 2, prelevee: true, cat: 'Abonnements' },
+  { nom: 'Électricité', cents: 8850, jour: 5, prelevee: true, cat: 'Énergie' },
+  { nom: 'Mutuelle', cents: 7640, jour: 8, prelevee: true, cat: 'Santé' },
+  { nom: 'Loyer', cents: 78000, jour: 10, prelevee: false, cat: 'Logement' },
+  { nom: 'Assurance habitation', cents: 2875, jour: 12, prelevee: false, cat: 'Assurance' },
+  { nom: 'Internet', cents: 3499, jour: 15, prelevee: false, cat: 'Télécom' },
+  { nom: 'Téléphone', cents: 1599, jour: 18, prelevee: false, cat: 'Télécom' },
+  { nom: 'Assurance auto', cents: 5420, jour: 20, prelevee: false, cat: 'Assurance' },
+  { nom: 'Impôt sur le revenu', cents: 19860, jour: 25, prelevee: false, cat: 'Impôts' },
 ] satisfies { nom: string; cents: number; jour: number; prelevee: boolean; cat: NomCategorie }[]
 
 const CHARGES_COURANT = [
-  { nom: 'Salle de sport', cents: 2900, jour: 3, prelevee: false, cat: 'Sport' },
-  { nom: 'Spotify', cents: 1199, jour: 4, prelevee: true, cat: 'Abonnements' },
-  { nom: 'iCloud', cents: 299, jour: 6, prelevee: true, cat: 'Abonnements' },
-  { nom: 'Assurance téléphone', cents: 899, jour: 14, prelevee: false, cat: 'Assurance' },
-  { nom: 'Abonnement transport', cents: 6228, jour: 20, prelevee: false, cat: 'Transport' },
+  { nom: 'Salle de sport', cents: 2490, jour: 3, prelevee: false, cat: 'Sport' },
+  { nom: 'Musique en ligne', cents: 1099, jour: 4, prelevee: true, cat: 'Abonnements' },
+  { nom: 'Stockage en ligne', cents: 299, jour: 6, prelevee: true, cat: 'Abonnements' },
+  { nom: 'Assurance téléphone', cents: 750, jour: 14, prelevee: false, cat: 'Assurance' },
+  { nom: 'Abonnement transport', cents: 4860, jour: 20, prelevee: false, cat: 'Transport' },
 ] satisfies { nom: string; cents: number; jour: number; prelevee: boolean; cat: NomCategorie }[]
 
-/** Montants ANNUELS : divisibles par 12 pour que la provision tombe juste. */
+/** Montants ANNUELS, divisibles par 12 pour que la provision tombe sur des centimes ronds. */
 const CHARGES_PROVISIONS = [
-  { nom: 'Eau', cents: 60000, cat: 'Eau' },
-  { nom: 'Ordures ménagères', cents: 30000, cat: 'Déchets' },
-  { nom: 'Entretien voiture', cents: 45000, cat: 'Véhicule' },
-  { nom: 'Ramonage chaudière', cents: 12000, cat: 'Logement' },
+  { nom: 'Eau', cents: 54000, cat: 'Eau' },
+  { nom: 'Ordures ménagères', cents: 24000, cat: 'Déchets' },
+  { nom: 'Entretien voiture', cents: 38400, cat: 'Véhicule' },
+  { nom: 'Ramonage chaudière', cents: 10800, cat: 'Logement' },
 ] satisfies { nom: string; cents: number; cat: NomCategorie }[]
 
 const BUDGETS = [
   {
     nom: 'Courses',
-    cents: 40000,
+    cents: 35000,
     cat: 'Alimentation',
     depenses: [
-      { libelle: 'Carrefour', cents: 12450, jour: 2 },
-      { libelle: 'Marché', cents: 3800, jour: 4 },
-      { libelle: 'Lidl', cents: 8930, jour: 6 },
-      { libelle: 'Boulangerie', cents: 1620, jour: 7 },
-      { libelle: 'Carrefour', cents: 4400, jour: 8 },
+      { libelle: 'Supermarché', cents: 9830, jour: 2 },
+      { libelle: 'Marché', cents: 2460, jour: 4 },
+      { libelle: 'Supérette', cents: 7615, jour: 6 },
+      { libelle: 'Boulangerie', cents: 1245, jour: 7 },
+      { libelle: 'Supermarché', cents: 5690, jour: 8 },
     ],
   },
   {
     nom: 'Essence',
-    cents: 40000,
+    cents: 32000,
     cat: 'Transport',
-    depenses: [{ libelle: 'Total Wasquehal', cents: 7800, jour: 5 }],
+    depenses: [{ libelle: 'Station-service', cents: 6250, jour: 5 }],
   },
   {
     nom: 'Restaurants',
-    cents: 25000,
+    cents: 18000,
     cat: 'Restaurants',
     depenses: [
-      { libelle: 'Le Bistrot', cents: 6800, jour: 3 },
-      { libelle: 'Pizzeria', cents: 4250, jour: 6 },
-      { libelle: 'Brunch', cents: 7950, jour: 8 },
+      { libelle: 'Bistrot', cents: 5240, jour: 3 },
+      { libelle: 'Pizzeria', cents: 3890, jour: 6 },
+      { libelle: 'Brunch', cents: 5190, jour: 8 },
     ],
   },
   {
     nom: 'Loisirs',
-    cents: 12000,
+    cents: 10000,
     cat: 'Loisirs',
     depenses: [
-      { libelle: 'Cinéma', cents: 2400, jour: 4 },
-      { libelle: 'Concert', cents: 8900, jour: 7 },
-      { libelle: 'Librairie', cents: 1900, jour: 8 },
+      { libelle: 'Cinéma', cents: 1980, jour: 4 },
+      { libelle: 'Concert', cents: 7400, jour: 7 },
+      { libelle: 'Librairie', cents: 1880, jour: 8 },
     ],
   },
 ] satisfies {
@@ -111,24 +107,17 @@ const BUDGETS = [
 }[]
 
 const DEBUT_CYCLE = '2025-07-01'
+const SALAIRES = [240000, 190000]
 
 /**
- * Charge le jeu de démonstration.
- *
- * Deux usages, volontairement distincts :
- *
- *  • `semer()` sans argument — la commande `npm run seed` : remet toute la base à zéro,
- *    comptes utilisateurs compris. Réservé au développement.
- *  • `semer(foyerId)` — le bouton « Charger la démonstration » : remplace le contenu
- *    budgétaire du foyer visé sans supprimer ni les personnes ni les comptes
- *    utilisateurs. Sans cette distinction, charger la démo depuis l'application
- *    déconnecterait les deux membres du foyer et détruirait leurs identifiants.
+ * `semer()` sans argument remet toute la base à zéro, comptes utilisateurs compris :
+ * réservé à `npm run seed`. `semer(foyerId)` remplace le seul contenu budgétaire du
+ * foyer visé — sans cette distinction, charger la démo depuis l'application
+ * déconnecterait ses deux membres.
  */
 export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }> {
   return sql.begin(async (tx) => {
     if (foyerIdCible === undefined) {
-      // Table par table plutôt qu'un TRUNCATE global : on ne touche pas à
-      // schema_migrations, et l'ordre respecte les clés étrangères.
       await tx`TRUNCATE depense, budget, charge, compte, categorie, invitation, session, utilisateur, personne, foyer RESTART IDENTITY CASCADE`
     }
 
@@ -144,14 +133,10 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
 
       await tx`
         INSERT INTO personne (foyer_id, prenom, salaire_net_cents, couleur, ordre)
-        VALUES (${foyerId}, 'Hélène', 280000, 'violet', 0),
-               (${foyerId}, 'Francis', 220000, 'turquoise', 1)
+        VALUES (${foyerId}, 'Alex', ${SALAIRES[0]!}, 'violet', 0),
+               (${foyerId}, 'Camille', ${SALAIRES[1]!}, 'turquoise', 1)
       `
     } else {
-      // Rechargement depuis l'application : on remplace le contenu budgétaire du foyer
-      // sans toucher aux personnes ni aux comptes utilisateurs. Les salaires sont
-      // ramenés aux valeurs de référence, sans quoi les montants de répartition
-      // affichés ne correspondraient plus à ceux de la documentation.
       foyerId = foyerIdCible
       await tx`DELETE FROM compte WHERE foyer_id = ${foyerId}`
       await tx`DELETE FROM categorie WHERE foyer_id = ${foyerId}`
@@ -162,10 +147,9 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
       const personnes = await tx<{ id: number }[]>`
         SELECT id FROM personne WHERE foyer_id = ${foyerId} ORDER BY ordre, id
       `
-      const salaires = [280000, 220000]
       for (const [i, personne] of personnes.entries()) {
         await tx`
-          UPDATE personne SET salaire_net_cents = ${salaires[i] ?? 0} WHERE id = ${personne.id}
+          UPDATE personne SET salaire_net_cents = ${SALAIRES[i] ?? 0} WHERE id = ${personne.id}
         `
       }
     }
@@ -180,9 +164,9 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
 
     const comptes = await tx<{ id: number; role: string }[]>`
       INSERT INTO compte ${tx([
-        { foyer_id: foyerId, nom: 'Compte prélèvements', banque: 'Crédit Mutuel', role: 'prelevements', couleur: 'bleu', ordre: 0 },
-        { foyer_id: foyerId, nom: 'Compte carte', banque: 'Revolut', role: 'courant', couleur: 'violet', ordre: 1 },
-        { foyer_id: foyerId, nom: 'Épargne provisions', banque: 'Revolut', role: 'provisions', couleur: 'turquoise', ordre: 2 },
+        { foyer_id: foyerId, nom: 'Compte prélèvements', banque: 'Banque principale', role: 'prelevements', couleur: 'bleu', ordre: 0 },
+        { foyer_id: foyerId, nom: 'Compte carte', banque: 'Néobanque', role: 'courant', couleur: 'violet', ordre: 1 },
+        { foyer_id: foyerId, nom: 'Épargne provisions', banque: 'Livret', role: 'provisions', couleur: 'turquoise', ordre: 2 },
       ])}
       RETURNING id, role
     `
@@ -247,7 +231,6 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
   })
 }
 
-// Exécution directe : `npm run seed`
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { foyerId } = await semer()
   console.log(`Jeu de démonstration chargé (foyer #${foyerId}).`)

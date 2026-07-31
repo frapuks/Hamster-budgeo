@@ -28,12 +28,8 @@ function Colonne({ children, avecOnglets }: { children: React.ReactNode; avecOng
 }
 
 /**
- * Racine de l'application.
- *
  * L'état du foyer sert aussi de test de session : le serveur répond 401 sans cookie
- * valide, et l'écran de connexion prend alors la place de l'application. Pas besoin
- * d'un appel d'authentification séparé — celui qui charge les données répond déjà à la
- * question « suis-je connecté ? ».
+ * valide. Pas besoin d'un appel d'authentification séparé.
  */
 export function App() {
   const { isPending, isError, error } = useEtat()
@@ -62,12 +58,10 @@ export function App() {
         <Route path="/" element={<Accueil />} />
         <Route path="/comptes/:id" element={<DetailCompte />} />
         <Route path="/charges" element={<Charges />} />
-        {/* `nouvelle` avant `:id` : sans cet ordre, la route paramétrée capterait
-            le mot et tenterait de charger une charge d'identifiant « nouvelle ». */}
+        {/* Chemins littéraux avant la route paramétrée, sinon `:id` capte le mot. */}
         <Route path="/charges/nouvelle" element={<FormulaireCharge />} />
         <Route path="/charges/:id" element={<FormulaireCharge />} />
         <Route path="/budgets" element={<Budgets />} />
-        {/* Comme pour les charges : les chemins littéraux avant la route paramétrée. */}
         <Route path="/budgets/nouveau" element={<FormulaireBudget />} />
         <Route path="/budgets/:id/modifier" element={<FormulaireBudget />} />
         <Route path="/budgets/:id" element={<DetailBudget />} />

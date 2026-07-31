@@ -1,15 +1,9 @@
 import { sql } from './client.js'
 
 /**
- * Démarre un nouveau cycle.
- *
- * C'est la seule opération destructive de l'application, et elle tient en trois
- * requêtes — c'est le dividende de la décision « pas d'historique ». Elle décoche les
- * charges, efface les dépenses du cycle, et date le nouveau départ.
- *
- * Le tout dans une transaction : un reset à moitié appliqué laisserait des charges
- * décochées avec les dépenses de l'ancien cycle, un état incohérent que rien ne
- * permettrait de rattraper puisqu'il n'y a pas d'historique.
+ * Seule opération destructive de l'application. La transaction est indispensable : un
+ * reset à moitié appliqué laisserait des charges décochées avec les dépenses de
+ * l'ancien cycle, sans aucun moyen de rattrapage faute d'historique.
  */
 export async function demarrerNouveauCycle(foyerId: number): Promise<void> {
   await sql.begin(async (tx) => {

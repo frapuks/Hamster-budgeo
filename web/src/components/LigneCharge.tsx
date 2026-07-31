@@ -1,6 +1,6 @@
 import { Box, Checkbox, Stack, Typography } from '@mui/material'
-import { formatEuros } from '@shared/format.js'
-import type { ChargeCalculee } from '@shared/types.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
+import type { ChargeCalculee } from '@hamsterbudgeo/shared/types.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { Carte } from './Carte.js'
 import { PuceStatut } from './PuceStatut.js'

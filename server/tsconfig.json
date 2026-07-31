@@ -12,7 +12,7 @@
     "outDir": "dist",
     "rootDir": "..",
     "paths": {
-      "@shared/*": ["../shared/src/*"]
+      "@hamsterbudgeo/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*.ts", "../shared/src/**/*.ts"]
