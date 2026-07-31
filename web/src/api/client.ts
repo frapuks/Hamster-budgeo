@@ -1,4 +1,10 @@
-import type { EtatFoyer, ModeRepartition, Sante, TypeCharge } from '@shared/types.js'
+import type {
+  EtatFoyer,
+  ModeRepartition,
+  RoleCompte,
+  Sante,
+  TypeCharge,
+} from '@shared/types.js'
 
 /**
  * Tous les appels HTTP passent par ce module.
@@ -35,6 +41,19 @@ export interface SaisieCharge {
   /** Par mois si `mensuelle`, PAR AN si `annuelle`. */
   montantCents: number
   jourPrelevement: number | null
+}
+
+export interface SaisieCompte {
+  nom: string
+  banque: string
+  role: RoleCompte
+  couleur: string
+}
+
+export interface SaisieCategorie {
+  nom: string
+  icone: string
+  couleur: string
 }
 
 async function envoyer<T>(methode: 'POST' | 'DELETE', chemin: string, corps?: unknown): Promise<T> {
@@ -88,4 +107,17 @@ export const api = {
     patch<EtatFoyer>(`/api/personnes/${personneId}/salaire`, { salaireNetCents }),
   definirModeRepartition: (mode: ModeRepartition) =>
     patch<EtatFoyer>('/api/foyer/repartition', { mode }),
+
+  creerCompte: (saisie: SaisieCompte) => envoyer<EtatFoyer>('POST', '/api/comptes', saisie),
+  modifierCompte: (id: number, saisie: SaisieCompte) =>
+    patch<EtatFoyer>(`/api/comptes/${id}`, saisie),
+  supprimerCompte: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/comptes/${id}`),
+  reordonnerComptes: (ids: number[]) => envoyer<EtatFoyer>('POST', '/api/comptes/ordre', { ids }),
+
+  creerCategorie: (saisie: SaisieCategorie) =>
+    envoyer<EtatFoyer>('POST', '/api/categories', saisie),
+  supprimerCategorie: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/categories/${id}`),
+
+  chargerDemo: () => envoyer<EtatFoyer>('POST', '/api/donnees/demo'),
+  toutEffacer: () => envoyer<EtatFoyer>('POST', '/api/donnees/effacer'),
 }

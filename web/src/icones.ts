@@ -42,6 +42,9 @@ const ICONES: Record<string, SvgIconComponent> = {
   cle: BuildRoundedIcon,
 }
 
+/** Noms d'icônes proposés à la création d'une catégorie. */
+export const NOMS_ICONES = Object.keys(ICONES)
+
 /** Icône d'une catégorie, avec repli neutre si le nom stocké est inconnu. */
 export function iconeDe(nom: string | undefined): SvgIconComponent {
   return (nom && ICONES[nom]) || LabelRoundedIcon
