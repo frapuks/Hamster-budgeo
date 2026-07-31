@@ -1,4 +1,4 @@
-import type { EtatFoyer, Sante, TypeCharge } from '@shared/types.js'
+import type { EtatFoyer, ModeRepartition, Sante, TypeCharge } from '@shared/types.js'
 
 /**
  * Tous les appels HTTP passent par ce module.
@@ -83,4 +83,9 @@ export const api = {
   supprimerCharge: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/charges/${id}`),
 
   demarrerNouveauCycle: () => envoyer<EtatFoyer>('POST', '/api/cycle/reset'),
+
+  modifierSalaire: (personneId: number, salaireNetCents: number) =>
+    patch<EtatFoyer>(`/api/personnes/${personneId}/salaire`, { salaireNetCents }),
+  definirModeRepartition: (mode: ModeRepartition) =>
+    patch<EtatFoyer>('/api/foyer/repartition', { mode }),
 }

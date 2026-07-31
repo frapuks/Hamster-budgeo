@@ -4,6 +4,7 @@ import { routesCycle } from './routes/cycle.js'
 import { routesDebug } from './routes/debug.js'
 import { routesDepenses } from './routes/depenses.js'
 import { routesEtat } from './routes/etat.js'
+import { routesFoyer } from './routes/foyer.js'
 import { routesSante } from './routes/sante.js'
 
 const port = Number(process.env.SERVER_PORT ?? 3001)
@@ -19,6 +20,7 @@ await app.register(routesEtat)
 await app.register(routesCharges)
 await app.register(routesDepenses)
 await app.register(routesCycle)
+await app.register(routesFoyer)
 await app.register(routesDebug)
 
 try {

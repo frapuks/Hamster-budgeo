@@ -10,8 +10,10 @@ import {
   Typography,
 } from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@shared/format.js'
+import { Carte } from '../components/Carte.js'
 import { CarteCompte } from '../components/CarteCompte.js'
 import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { LigneBudget } from '../components/LigneBudget.js'
@@ -131,16 +133,35 @@ export function Accueil() {
         </Box>
       )}
 
-      {/* Virement permanent -------------------------------------------------- */}
-      <Box>
-        <EnTeteSection titre="Virement permanent" />
-        <Typography variant="body2">
-          Total à virer chaque mois sur l'ensemble des comptes :{' '}
-          <Box component="span" sx={{ color: 'bleuClair', fontWeight: 700 }}>
-            {formatEuros(totaux.virementPermanentCents)}
-          </Box>
-        </Typography>
-      </Box>
+      {/* Accès aux deux écrans de configuration ------------------------------ */}
+      <Stack spacing={1.25}>
+        <Carte onClick={() => navigate('/virements')} sx={{ cursor: 'pointer' }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 600 }}>Virements permanents</Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
+                Les ordres à créer une fois dans ta banque
+              </Typography>
+            </Box>
+            <Typography variant="montantCarte" sx={{ fontSize: '1.125rem' }}>
+              {formatEuros(totaux.virementPermanentCents)}
+            </Typography>
+            <ChevronRightRoundedIcon sx={{ color: 'text.secondary' }} />
+          </Stack>
+        </Carte>
+
+        <Carte onClick={() => navigate('/repartition')} sx={{ cursor: 'pointer' }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 600 }}>Répartition du couple</Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
+                {etat.personnes.map((p) => p.prenom).join(' et ')}
+              </Typography>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ color: 'text.secondary' }} />
+          </Stack>
+        </Carte>
+      </Stack>
 
       {/* Nouveau cycle — discret, parce qu'irréversible ----------------------- */}
       <Button
