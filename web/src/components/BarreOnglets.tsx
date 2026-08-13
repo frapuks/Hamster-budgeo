@@ -1,5 +1,6 @@
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -7,9 +8,17 @@ import { COULEURS } from '../theme.js'
 import { CoucheFixe } from './CoucheFixe.js'
 
 const ONGLETS = [
-  { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
-  { chemin: '/charges', libelle: 'Charges', Icone: ReceiptLongRoundedIcon },
-  { chemin: '/reglages', libelle: 'Réglages', Icone: SettingsRoundedIcon },
+  { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon, rattaches: [] },
+  { chemin: '/charges', libelle: 'Charges', Icone: ReceiptLongRoundedIcon, rattaches: [] },
+  // Les deux écrans de détail du couple ne sont pas sous `/couple` : sans ce
+  // rattachement explicite, l'onglet s'éteindrait dès qu'on les ouvre.
+  {
+    chemin: '/couple',
+    libelle: 'Couple',
+    Icone: PeopleAltRoundedIcon,
+    rattaches: ['/repartition', '/virements'],
+  },
+  { chemin: '/reglages', libelle: 'Réglages', Icone: SettingsRoundedIcon, rattaches: [] },
 ] as const
 
 export function BarreOnglets() {
@@ -21,7 +30,8 @@ export function BarreOnglets() {
   const actif = ONGLETS.reduce(
     (meilleur, onglet, index) =>
       pathname === onglet.chemin ||
-      (onglet.chemin !== '/' && pathname.startsWith(`${onglet.chemin}/`))
+      (onglet.chemin !== '/' && pathname.startsWith(`${onglet.chemin}/`)) ||
+      onglet.rattaches.some((c) => pathname === c || pathname.startsWith(`${c}/`))
         ? index
         : meilleur,
     0,

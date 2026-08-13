@@ -51,7 +51,7 @@ function BoutonCopier({ cents, onCopie }: { cents: number; onCopie: () => void }
 }
 
 export function Virements() {
-  const retour = useRetour('/')
+  const retour = useRetour('/couple')
   const navigate = useNavigate()
   const { data: etat, isPending, isError } = useEtat()
   const [copie, setCopie] = useState(false)

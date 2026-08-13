@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  Divider,
   IconButton,
   Skeleton,
   Stack,
@@ -14,7 +13,6 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded'
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
@@ -24,6 +22,7 @@ import type { Categorie, CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/
 import { api, ErreurApi } from '../api/client.js'
 import { BoutonAjouter } from '../components/BoutonAjouter.js'
 import { Carte } from '../components/Carte.js'
+import { Section } from '../components/Section.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleCategorie } from '../components/FeuilleCategorie.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
@@ -32,32 +31,6 @@ import { TuileCategorie, COULEURS_CATEGORIE, type CouleurCategorie } from '../co
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { COULEURS, RAYONS } from '../theme.js'
-
-function Section({
-  titre,
-  action,
-  children,
-}: {
-  titre: string
-  action?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <Box>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        spacing={1}
-        sx={{ mb: 1.25 }}
-      >
-        <Typography variant="libelle">{titre}</Typography>
-        {action}
-      </Stack>
-      {children}
-    </Box>
-  )
-}
 
 /**
  * Action d'en-tête de section. Texte cliquable plutôt qu'un Button : celui-ci porte
@@ -181,28 +154,6 @@ export function Reglages() {
   return (
     <Stack spacing={3} sx={{ pb: 2 }}>
       <Typography variant="titreSection">Réglages</Typography>
-
-      <Section titre="Foyer">
-        <Carte onClick={() => navigate('/repartition')} sx={{ cursor: 'pointer', p: 1.75 }}>
-          <Stack spacing={1}>
-            {etat.personnes.map((personne) => (
-              <Stack key={personne.id} direction="row" alignItems="center" spacing={1.5}>
-                <Typography sx={{ fontWeight: 600, flexGrow: 1 }}>{personne.prenom}</Typography>
-                <Typography sx={{ fontWeight: 600 }}>
-                  {formatEuros(personne.salaireNetCents)}
-                </Typography>
-              </Stack>
-            ))}
-            <Divider />
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="body2" sx={{ fontSize: '0.8125rem', flexGrow: 1 }}>
-                Modifier les salaires et le mode de répartition
-              </Typography>
-              <ChevronRightRoundedIcon sx={{ color: 'text.secondary' }} />
-            </Stack>
-          </Stack>
-        </Carte>
-      </Section>
 
       <Section
         titre="Comptes bancaires"

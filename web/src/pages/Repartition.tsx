@@ -94,7 +94,7 @@ function CartePersonne({
 }
 
 export function Repartition() {
-  const retour = useRetour('/')
+  const retour = useRetour('/couple')
   const queryClient = useQueryClient()
   const { data: etat, isPending, isError } = useEtat()
 

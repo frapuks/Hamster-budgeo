@@ -5,6 +5,7 @@ import { BarreOnglets } from './components/BarreOnglets.js'
 import { useEtat } from './hooks/useEtat.js'
 import { Accueil } from './pages/Accueil.js'
 import { Charges } from './pages/Charges.js'
+import { Couple } from './pages/Couple.js'
 import { Connexion } from './pages/Connexion.js'
 import { Demo } from './pages/Demo.js'
 import { DetailBudget } from './pages/DetailBudget.js'
@@ -81,6 +82,7 @@ export function App() {
         <Route path="/budgets/nouveau" element={<FormulaireBudget />} />
         <Route path="/budgets/:id/modifier" element={<FormulaireBudget />} />
         <Route path="/budgets/:id" element={<DetailBudget />} />
+        <Route path="/couple" element={<Couple />} />
         <Route path="/repartition" element={<Repartition />} />
         <Route path="/virements" element={<Virements />} />
         <Route path="/reglages" element={<Reglages />} />
