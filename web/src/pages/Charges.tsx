@@ -146,13 +146,11 @@ export function Charges() {
         <BoutonAjouter label="Ajouter une charge" onClick={() => navigate('/charges/nouvelle')} />
       </Stack>
 
-      <Carte>
-        <Stack direction="row" divider={<Divider orientation="vertical" flexItem />}>
-          <Stat libelle="Charges" valeur={String(toutes.length)} />
-          <Stat libelle="Par mois" valeur={formatEuros(lisseTotal)} />
-          <Stat libelle="Par an" valeur={formatEuros(annuelTotal)} />
-        </Stack>
-      </Carte>
+      <Stack direction="row" divider={<Divider orientation="vertical" flexItem />}>
+        <Stat libelle="Charges" valeur={String(toutes.length)} />
+        <Stat libelle="Par mois" valeur={formatEuros(lisseTotal)} />
+        <Stat libelle="Par an" valeur={formatEuros(annuelTotal)} />
+      </Stack>
 
       <ToggleButtonGroup exclusive fullWidth value={axe} onChange={(_, v) => v && setAxe(v)}>
         <ToggleButton value="type">Par type</ToggleButton>

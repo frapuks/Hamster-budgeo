@@ -54,12 +54,17 @@ export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClic
       : 'ardoise']
 
   return (
-    <Carte onClick={onClick} sx={{ p: 1.75, cursor: onClick ? 'pointer' : 'default' }}>
+    <Carte
+      onClick={onClick}
+      sx={{
+        p: 1.75,
+        cursor: onClick ? 'pointer' : 'default',
+        // La couleur du compte tient tout le flanc gauche : elle remplace la pastille,
+        // qui ferait double emploi, et se repère sans être lue.
+        borderLeft: `4px solid ${pastille}`,
+      }}
+    >
       <Stack direction="row" alignItems="center" spacing={1.5}>
-        <Box
-          sx={{ width: 8, height: 8, borderRadius: '999px', backgroundColor: pastille, flexShrink: 0 }}
-        />
-
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <Typography sx={{ fontWeight: 600 }} noWrap>
             {compte.nom}
