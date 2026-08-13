@@ -19,11 +19,10 @@ import { api, type SaisieBudget } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { PaveNumerique } from '../components/PaveNumerique.js'
-import { TuileCategorie } from '../components/TuileCategorie.js'
+import { SelecteurCategorie } from '../components/SelecteurCategorie.js'
 import { CLE_ETAT, useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
-import { couleurDe, iconeDe } from '../icones.js'
-import { COULEURS, RAYONS } from '../theme.js'
+import { COULEURS } from '../theme.js'
 
 export function FormulaireBudget() {
   const { id } = useParams<{ id: string }>()
@@ -139,35 +138,11 @@ export function FormulaireBudget() {
         ))}
       </TextField>
 
-      <Box>
-        <Typography variant="libelle" sx={{ mb: 1 }}>
-          Catégorie
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {etat.categories.map((categorie) => {
-            const active = categorie.id === categorieId
-            return (
-              <Box
-                key={categorie.id}
-                onClick={() => setCategorieId(active ? null : categorie.id)}
-                sx={{
-                  cursor: 'pointer',
-                  borderRadius: `${RAYONS.tuile}px`,
-                  outline: active ? `2px solid ${COULEURS.bleuClair}` : 'none',
-                  outlineOffset: 2,
-                }}
-                title={categorie.nom}
-              >
-                <TuileCategorie
-                  Icone={iconeDe(categorie.icone)}
-                  couleur={couleurDe(categorie.couleur)}
-                  taille={40}
-                />
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
+      <SelecteurCategorie
+        categories={etat.categories}
+        valeur={categorieId}
+        onChange={setCategorieId}
+      />
 
       <Carte sx={{ borderLeft: `3px solid ${COULEURS.bleu}` }}>
         <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>

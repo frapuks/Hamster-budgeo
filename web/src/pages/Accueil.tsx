@@ -205,13 +205,23 @@ export function Accueil() {
         <EnTeteSection
           titre="Mes budgets"
           action={
-            <Button
-              size="small"
-              startIcon={<AddRoundedIcon />}
+            // Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
+            // vertical dans le thème, ce qui étirait la ligne de titre.
+            <Typography
+              component="button"
+              variant="libelle"
               onClick={() => navigate('/budgets/nouveau')}
+              sx={{
+                background: 'none',
+                border: 'none',
+                p: 0,
+                cursor: 'pointer',
+                color: COULEURS.bleuClair,
+                fontFamily: 'inherit',
+              }}
             >
               Ajouter
-            </Button>
+            </Typography>
           }
         />
 

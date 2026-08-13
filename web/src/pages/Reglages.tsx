@@ -18,24 +18,42 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
+import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
-import type { CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
+import type { Categorie, CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
+import { FeuilleCategorie } from '../components/FeuilleCategorie.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
 import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { TuileCategorie, COULEURS_CATEGORIE, type CouleurCategorie } from '../components/TuileCategorie.js'
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
+import { COULEURS, RAYONS } from '../theme.js'
 
-function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
+function Section({
+  titre,
+  action,
+  children,
+}: {
+  titre: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
     <Box>
-      <Typography variant="libelle" sx={{ mb: 1.25 }}>
-        {titre}
-      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        spacing={1}
+        sx={{ mb: 1.25 }}
+      >
+        <Typography variant="libelle">{titre}</Typography>
+        {action}
+      </Stack>
       {children}
     </Box>
   )
@@ -56,10 +74,17 @@ export function Reglages() {
   const [feuilleOuverte, setFeuilleOuverte] = useState(false)
   const [compteASupprimer, setCompteASupprimer] = useState<CompteCalcule | null>(null)
   const [cycleOuvert, setCycleOuvert] = useState(false)
+  const [categorieOuverte, setCategorieOuverte] = useState(false)
+  const [categorieASupprimer, setCategorieASupprimer] = useState<Categorie | null>(null)
+  const [editionCategories, setEditionCategories] = useState(false)
 
   const surSucces = (nouvelEtat: EtatFoyer) => queryClient.setQueryData(CLE_ETAT, nouvelEtat)
   const reordonner = useMutation({ mutationFn: api.reordonnerComptes, onSuccess: surSucces })
   const supprimerCompte = useMutation({ mutationFn: api.supprimerCompte, onSuccess: surSucces })
+  const supprimerCategorie = useMutation({
+    mutationFn: api.supprimerCategorie,
+    onSuccess: surSucces,
+  })
   const invitation = useMutation({ mutationFn: api.creerInvitation })
 
   /**
@@ -94,6 +119,20 @@ export function Reglages() {
     if (cible < 0 || cible >= ids.length) return
     ;[ids[index], ids[cible]] = [ids[cible]!, ids[index]!]
     reordonner.mutate(ids)
+  }
+
+  /** Charges et budgets rattachés à une catégorie. */
+  const utilisations = (categorieId: number) =>
+    etat.comptes.flatMap((c) => c.charges).filter((c) => c.categorie?.id === categorieId).length +
+    etat.comptes.flatMap((c) => c.budgets).filter((b) => b.categorie?.id === categorieId).length
+
+  /**
+   * Une catégorie que rien n'utilise part sans confirmation : il n'y a rien à perdre,
+   * et la recréer coûte deux clics. Dès qu'elle classe quelque chose, on demande.
+   */
+  const retirerCategorie = (categorie: Categorie) => {
+    if (utilisations(categorie.id) === 0) supprimerCategorie.mutate(categorie.id)
+    else setCategorieASupprimer(categorie)
   }
 
   const ouvrirCompte = (compte?: CompteCalcule) => {
@@ -196,18 +235,82 @@ export function Reglages() {
         </Stack>
       </Section>
 
-      <Section titre={`Catégories (${etat.categories.length})`}>
+      <Section
+        titre={`Catégories (${etat.categories.length})`}
+        action={
+          // Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
+          // vertical dans le thème, ce qui étirait la ligne de titre et désalignait
+          // cette section des autres.
+          <Typography
+            component="button"
+            variant="libelle"
+            onClick={() => setEditionCategories((e) => !e)}
+            sx={{
+              background: 'none',
+              border: 'none',
+              p: 0,
+              cursor: 'pointer',
+              color: COULEURS.bleuClair,
+              fontFamily: 'inherit',
+            }}
+          >
+            {editionCategories ? 'Terminer' : 'Modifier'}
+          </Typography>
+        }
+      >
         <Carte sx={{ p: 1.75 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {etat.categories.map((categorie) => (
-              <Box key={categorie.id} title={categorie.nom}>
+              <Box key={categorie.id} title={categorie.nom} sx={{ position: 'relative' }}>
                 <TuileCategorie
                   Icone={iconeDe(categorie.icone)}
                   couleur={couleurDe(categorie.couleur)}
                   taille={40}
                 />
+
+                {editionCategories && (
+                  <Box
+                    role="button"
+                    aria-label={`Supprimer ${categorie.nom}`}
+                    onClick={() => retirerCategorie(categorie)}
+                    sx={{
+                      position: 'absolute',
+                      top: -6,
+                      right: -6,
+                      width: 20,
+                      height: 20,
+                      borderRadius: '999px',
+                      backgroundColor: COULEURS.corail,
+                      color: '#FFF',
+                      display: 'grid',
+                      placeItems: 'center',
+                      cursor: 'pointer',
+                      boxShadow: `0 0 0 2px ${COULEURS.surface}`,
+                    }}
+                  >
+                    <RemoveRoundedIcon sx={{ fontSize: 14 }} />
+                  </Box>
+                )}
               </Box>
             ))}
+
+            <Box
+              onClick={() => setCategorieOuverte(true)}
+              aria-label="Ajouter une catégorie"
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: `${RAYONS.tuile}px`,
+                border: `1px dashed ${COULEURS.lisereFort}`,
+                color: 'text.secondary',
+                display: 'grid',
+                placeItems: 'center',
+                cursor: 'pointer',
+                '&:hover': { borderColor: COULEURS.bleuClair, color: COULEURS.bleuClair },
+              }}
+            >
+              <AddRoundedIcon fontSize="small" />
+            </Box>
           </Box>
         </Carte>
       </Section>
@@ -280,6 +383,26 @@ export function Reglages() {
           </Button>
         </Stack>
       </Section>
+
+      <DialogueConfirmation
+        ouvert={categorieASupprimer !== null}
+        titre="Supprimer cette catégorie ?"
+        message={
+          categorieASupprimer
+            ? `« ${categorieASupprimer.nom} » sera effacée. ${utilisations(categorieASupprimer.id)} élément(s) garderont leur montant mais perdront ce classement.`
+            : ''
+        }
+        onConfirmer={() => {
+          if (categorieASupprimer) supprimerCategorie.mutate(categorieASupprimer.id)
+          setCategorieASupprimer(null)
+        }}
+        onAnnuler={() => setCategorieASupprimer(null)}
+      />
+
+      <FeuilleCategorie
+        ouverte={categorieOuverte}
+        onFermer={() => setCategorieOuverte(false)}
+      />
 
       <FeuilleNouveauCycle
         ouverte={cycleOuvert}
