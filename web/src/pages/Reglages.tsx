@@ -25,6 +25,7 @@ import { api, ErreurApi } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
+import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { TuileCategorie, COULEURS_CATEGORIE, type CouleurCategorie } from '../components/TuileCategorie.js'
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
@@ -54,6 +55,7 @@ export function Reglages() {
   const [compteEdite, setCompteEdite] = useState<CompteCalcule | undefined>()
   const [feuilleOuverte, setFeuilleOuverte] = useState(false)
   const [compteASupprimer, setCompteASupprimer] = useState<CompteCalcule | null>(null)
+  const [cycleOuvert, setCycleOuvert] = useState(false)
 
   const surSucces = (nouvelEtat: EtatFoyer) => queryClient.setQueryData(CLE_ETAT, nouvelEtat)
   const reordonner = useMutation({ mutationFn: api.reordonnerComptes, onSuccess: surSucces })
@@ -211,17 +213,28 @@ export function Reglages() {
       </Section>
 
       <Section titre="Cycle">
-        <Carte sx={{ p: 1.75 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <AutorenewRoundedIcon sx={{ color: 'text.secondary' }} />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography sx={{ fontWeight: 600 }}>Dernier reset</Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
-                le {formatDate(etat.foyer.dernierReset)}
-              </Typography>
-            </Box>
-          </Stack>
-        </Carte>
+        <Stack spacing={1.25}>
+          <Carte sx={{ p: 1.75 }}>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <AutorenewRoundedIcon sx={{ color: 'text.secondary' }} />
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography sx={{ fontWeight: 600 }}>Dernier reset</Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
+                  le {formatDate(etat.foyer.dernierReset)}
+                </Typography>
+              </Box>
+            </Stack>
+          </Carte>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<AutorenewRoundedIcon />}
+            onClick={() => setCycleOuvert(true)}
+          >
+            Nouveau cycle — tout décocher
+          </Button>
+        </Stack>
       </Section>
 
       <Section titre="Mon compte">
@@ -267,6 +280,12 @@ export function Reglages() {
           </Button>
         </Stack>
       </Section>
+
+      <FeuilleNouveauCycle
+        ouverte={cycleOuvert}
+        onFermer={() => setCycleOuvert(false)}
+        etat={etat}
+      />
 
       <FeuilleCompte
         ouverte={feuilleOuverte}

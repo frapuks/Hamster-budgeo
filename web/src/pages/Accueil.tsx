@@ -22,7 +22,6 @@ import { api, ErreurApi } from '../api/client.js'
 import { Carte } from '../components/Carte.js'
 import { CarteCompte } from '../components/CarteCompte.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
-import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { CLE_ETAT, useEtat } from '../hooks/useEtat.js'
 import { proportionRestante } from '../proportions.js'
@@ -52,7 +51,6 @@ export function Accueil() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: etat, isPending, isError, error } = useEtat()
-  const [cycleOuvert, setCycleOuvert] = useState(false)
   const [compteOuvert, setCompteOuvert] = useState(false)
 
   const chargerDemo = useMutation({
@@ -275,21 +273,6 @@ export function Accueil() {
           </Stack>
         </Carte>
       </Stack>
-
-      <Button
-        variant="outlined"
-        fullWidth
-        startIcon={<AutorenewRoundedIcon />}
-        onClick={() => setCycleOuvert(true)}
-      >
-        Nouveau cycle — tout décocher
-      </Button>
-
-      <FeuilleNouveauCycle
-        ouverte={cycleOuvert}
-        onFermer={() => setCycleOuvert(false)}
-        etat={etat}
-      />
     </Stack>
   )
 }
