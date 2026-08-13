@@ -2,16 +2,16 @@ import { useState } from 'react'
 import {
   Alert,
   Box,
-  Button,
+  Divider,
   Skeleton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
-import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import { useNavigate } from 'react-router-dom'
-import { coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
+import { coutAnnuel, coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { ChargeCalculee, CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { Carte } from '../components/Carte.js'
@@ -19,6 +19,18 @@ import { PuceType } from '../components/PuceType.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
+import { COULEURS } from '../theme.js'
+
+function Stat({ libelle, valeur }: { libelle: string; valeur: string }) {
+  return (
+    <Box sx={{ textAlign: 'center', flex: 1 }}>
+      <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+        {libelle}
+      </Typography>
+      <Typography sx={{ fontWeight: 700 }}>{valeur}</Typography>
+    </Box>
+  )
+}
 
 type Groupement = 'type' | 'compte'
 
@@ -65,24 +77,28 @@ function LigneChargeListe({ charge, onClick }: { charge: ChargeCalculee; onClick
           taille={40}
         />
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.25 }}>
-            <Typography sx={{ fontWeight: 600 }} noWrap>
-              {charge.nom}
+          <Typography sx={{ fontWeight: 600, mb: 0.25 }} noWrap>
+            {charge.nom}
+          </Typography>
+          {/* Sur une charge annuelle, l'équivalent mensuel prend la place du jour de
+              prélèvement : c'est lui qui alimente le virement permanent. */}
+          {annuelle ? (
+            <Typography variant="body2" sx={{ fontSize: '0.8125rem' }} noWrap>
+              soit {formatEuros(charge.coutMensuelLisseCents)}/mois
             </Typography>
-            <PuceType type={charge.type} />
-          </Stack>
-          <Typography variant="body2" sx={{ fontSize: '0.8125rem' }} noWrap>
-            {charge.categorie?.nom ?? 'Sans catégorie'}
-            {charge.jourPrelevement !== null && ` · le ${charge.jourPrelevement}`}
-          </Typography>
+          ) : (
+            charge.jourPrelevement !== null && (
+              <Typography variant="body2" sx={{ fontSize: '0.8125rem' }} noWrap>
+                le {charge.jourPrelevement}
+              </Typography>
+            )
+          )}
         </Box>
-        <Stack alignItems="flex-end">
+        <Stack alignItems="flex-end" spacing={0.5}>
           <Typography sx={{ fontWeight: 700 }}>{formatEuros(charge.montantCents)}</Typography>
-          {/* Sur une charge annuelle, l'équivalent mensuel est le chiffre qui compte
-              vraiment : c'est lui qui alimente le virement permanent. */}
-          <Typography variant="body2" sx={{ fontSize: '0.6875rem' }}>
-            {annuelle ? `soit ${formatEuros(charge.coutMensuelLisseCents)}/mois` : 'par mois'}
-          </Typography>
+          {/* La nature reste collée au montant : c'est elle qui empêche de lire
+              540,00 € par an comme 540,00 € par mois. */}
+          <PuceType type={charge.type} />
         </Stack>
       </Stack>
     </Carte>
@@ -93,6 +109,17 @@ export function Charges() {
   const navigate = useNavigate()
   const { data: etat, isPending, isError } = useEtat()
   const [axe, setAxe] = useState<Groupement>('type')
+  // Les groupes repliés, par clé. Tout est déplié au départ : masquer par défaut
+  // ferait passer des charges inaperçues.
+  const [replies, setReplies] = useState<Set<string>>(new Set())
+
+  const basculer = (cle: string) =>
+    setReplies((actuelles) => {
+      const suivantes = new Set(actuelles)
+      if (suivantes.has(cle)) suivantes.delete(cle)
+      else suivantes.add(cle)
+      return suivantes
+    })
 
   if (isPending) {
     return (
@@ -109,20 +136,38 @@ export function Charges() {
 
   const toutes = etat.comptes.flatMap((c) => c.charges.filter((ch) => ch.actif))
   const lisseTotal = toutes.reduce((s, c) => s + coutMensuelLisse(c), 0)
+  const annuelTotal = toutes.reduce((s, c) => s + coutAnnuel(c), 0)
   const groupes = grouper(etat.comptes, axe)
 
   return (
     <Stack spacing={2.5} sx={{ pb: 2 }}>
-      <Typography variant="titreSection">Mes charges</Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+        <Typography variant="titreSection">Mes charges</Typography>
+        {/* Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
+            vertical dans le thème, ce qui étirerait la ligne de titre. */}
+        <Typography
+          component="button"
+          variant="libelle"
+          onClick={() => navigate('/charges/nouvelle')}
+          sx={{
+            background: 'none',
+            border: 'none',
+            p: 0,
+            cursor: 'pointer',
+            color: COULEURS.bleuClair,
+            fontFamily: 'inherit',
+          }}
+        >
+          Ajouter
+        </Typography>
+      </Stack>
 
       <Carte>
-        <Typography variant="libelle" sx={{ mb: 0.5 }}>
-          Coût mensuel lissé
-        </Typography>
-        <Typography variant="montantCarte">{formatEuros(lisseTotal)}/mois</Typography>
-        <Typography variant="body2" sx={{ fontSize: '0.8125rem', mt: 0.5 }}>
-          {toutes.length} charges · c'est ce total qui détermine tes virements permanents
-        </Typography>
+        <Stack direction="row" divider={<Divider orientation="vertical" flexItem />}>
+          <Stat libelle="Charges" valeur={String(toutes.length)} />
+          <Stat libelle="Par mois" valeur={formatEuros(lisseTotal)} />
+          <Stat libelle="Par an" valeur={formatEuros(annuelTotal)} />
+        </Stack>
       </Carte>
 
       <ToggleButtonGroup exclusive fullWidth value={axe} onChange={(_, v) => v && setAxe(v)}>
@@ -131,27 +176,61 @@ export function Charges() {
       </ToggleButtonGroup>
 
       {groupes.map((groupe) => {
-        const sousTotal = groupe.charges.reduce((s, c) => s + coutMensuelLisse(c), 0)
+        // Un groupe entièrement annuel se totalise à l'année : c'est le montant qui
+        // sortira réellement. Vaut aussi pour le compte de provisions dans la vue
+        // « Par compte », qui ne porte que des charges annuelles.
+        const toutAnnuel = groupe.charges.every((c) => c.type === 'annuelle')
+        const sousTotal = groupe.charges.reduce(
+          (s, c) => s + (toutAnnuel ? coutAnnuel(c) : coutMensuelLisse(c)),
+          0,
+        )
+        const replie = replies.has(groupe.cle)
+
         return (
           <Box key={groupe.cle}>
             <Stack
               direction="row"
-              alignItems="baseline"
+              alignItems="center"
               justifyContent="space-between"
-              sx={{ mb: 1.25 }}
+              spacing={1}
+              onClick={() => basculer(groupe.cle)}
+              role="button"
+              aria-expanded={!replie}
+              sx={{ mb: 1.25, cursor: 'pointer', userSelect: 'none' }}
             >
-              <Typography variant="libelle">{groupe.titre}</Typography>
-              <Typography variant="libelle">{formatEuros(sousTotal)}/mois</Typography>
-            </Stack>
-            <Stack spacing={1.25}>
-              {groupe.charges.map((charge) => (
-                <LigneChargeListe
-                  key={charge.id}
-                  charge={charge}
-                  onClick={() => navigate(`/charges/${charge.id}`)}
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
+                <ExpandMoreRoundedIcon
+                  sx={{
+                    fontSize: 18,
+                    color: 'text.secondary',
+                    transform: replie ? 'rotate(-90deg)' : 'none',
+                    transition: 'transform 150ms ease',
+                  }}
                 />
-              ))}
+                <Typography variant="libelle" noWrap>
+                  {groupe.titre}
+                </Typography>
+              </Stack>
+              <Typography variant="libelle" noWrap>
+                {formatEuros(sousTotal)}/{toutAnnuel ? 'an' : 'mois'}
+              </Typography>
             </Stack>
+
+            {/* Rendu conditionnel plutôt qu'un Collapse animé : en repliant, sa
+                hauteur tombe à zéro et Chrome laissait traîner la couche de
+                composition du liseré de la première carte — une ligne fantôme qui ne
+                partait qu'au repaint suivant. */}
+            {!replie && (
+              <Stack spacing={1.25}>
+                {groupe.charges.map((charge) => (
+                  <LigneChargeListe
+                    key={charge.id}
+                    charge={charge}
+                    onClick={() => navigate(`/charges/${charge.id}`)}
+                  />
+                ))}
+              </Stack>
+            )}
           </Box>
         )
       })}
@@ -161,15 +240,6 @@ export function Charges() {
           Aucune charge enregistrée.
         </Typography>
       )}
-
-      <Button
-        variant="outlined"
-        fullWidth
-        startIcon={<AddRoundedIcon />}
-        onClick={() => navigate('/charges/nouvelle')}
-      >
-        Ajouter une charge
-      </Button>
     </Stack>
   )
 }

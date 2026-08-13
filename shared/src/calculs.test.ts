@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   besoinDuCycle,
+  coutAnnuel,
   coutMensuelLisse,
   dejaPreleve,
   provisionMensuelle,
@@ -82,6 +83,23 @@ describe('coutMensuelLisse — la parade au facteur 12', () => {
   })
 })
 
+
+describe('coutAnnuel', () => {
+  it('multiplie une charge mensuelle par douze', () => {
+    expect(coutAnnuel({ type: 'mensuelle', montantCents: 78000 })).toBe(936000)
+  })
+
+  it('laisse une charge annuelle inchangée', () => {
+    expect(coutAnnuel({ type: 'annuelle', montantCents: 54000 })).toBe(54000)
+  })
+
+  it("ne repasse pas par le lissé, dont l'arrondi fausserait le total", () => {
+    // 250 €/an lissés donnent 20,83 €/mois, soit 249,96 € sur l'année.
+    const charge = { type: 'annuelle' as const, montantCents: 25000 }
+    expect(coutAnnuel(charge)).toBe(25000)
+    expect(coutMensuelLisse(charge) * 12).toBe(24996)
+  })
+})
 
 describe('agrégats de charges', () => {
   const compteCM = [

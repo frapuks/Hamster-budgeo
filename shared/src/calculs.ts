@@ -27,6 +27,16 @@ export function coutMensuelLisse(charge: Pick<Charge, 'type' | 'montantCents'>):
   return charge.type === 'mensuelle' ? charge.montantCents : Math.round(charge.montantCents / 12)
 }
 
+/**
+ * Coût d'une charge sur douze mois, quelle que soit sa périodicité.
+ *
+ * Calculé depuis le montant réel plutôt qu'en multipliant le lissé par douze : sur une
+ * charge annuelle non divisible, l'arrondi du lissé fausserait le total.
+ */
+export function coutAnnuel(charge: Pick<Charge, 'type' | 'montantCents'>): number {
+  return charge.type === 'annuelle' ? charge.montantCents : charge.montantCents * 12
+}
+
 const estActiveMensuelle = (c: Charge) => c.actif && c.type === 'mensuelle'
 
 export function totalDuCycle(charges: Charge[]): number {

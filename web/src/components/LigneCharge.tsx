@@ -52,10 +52,11 @@ export function LigneCharge({
           >
             {charge.nom}
           </Typography>
-          <Typography variant="body2" sx={{ fontSize: '0.8125rem' }} noWrap>
-            {charge.categorie?.nom ?? 'Sans catégorie'}
-            {charge.jourPrelevement !== null && ` · le ${charge.jourPrelevement}`}
-          </Typography>
+          {charge.jourPrelevement !== null && (
+            <Typography variant="body2" sx={{ fontSize: '0.8125rem' }} noWrap>
+              le {charge.jourPrelevement}
+            </Typography>
+          )}
         </Box>
         <Stack alignItems="flex-end" spacing={0.5}>
           <Typography
