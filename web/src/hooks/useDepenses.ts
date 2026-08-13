@@ -23,6 +23,7 @@ function etatSansDepense(etat: EtatFoyer, depenseId: number): EtatFoyer {
     foyer: etat.foyer,
     personnes: etat.personnes,
     categories: etat.categories,
+    contributions: etat.contributions,
     comptes: etat.comptes.map((compte) => ({
       ...compte,
       budgets: compte.budgets.map((b) => ({

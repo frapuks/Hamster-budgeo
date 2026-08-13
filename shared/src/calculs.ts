@@ -1,5 +1,6 @@
 import type {
   Budget,
+  Contribution,
   BudgetCalcule,
   Categorie,
   Charge,
@@ -92,6 +93,103 @@ export function besoinDuCycle(charges: Charge[], budgets: Budget[]): number {
   return resteASortir(charges) + budgets.reduce((s, b) => s + resteADepenser(b), 0)
 }
 
+/** Ce qui arrive réellement sur un compte, toutes personnes confondues. */
+export function verseSurCompte(contributions: Contribution[], compteId: number): number {
+  return contributions
+    .filter((c) => c.compteId === compteId)
+    .reduce((s, c) => s + c.montantCents, 0)
+}
+
+/**
+ * Écart entre ce qui arrive sur le compte et ce qu'il réclame chaque mois.
+ *
+ * Négatif : le compte est sous-alimenté, un prélèvement finira par manquer. Positif :
+ * de l'argent s'y accumule sans emploi. Zéro est la cible.
+ */
+export function deltaCompte(
+  compte: Pick<CompteCalcule, 'id' | 'virementPermanentCents'>,
+  contributions: Contribution[],
+): number {
+  return verseSurCompte(contributions, compte.id) - compte.virementPermanentCents
+}
+
+/**
+ * Répartit le besoin de chaque compte selon le mode choisi.
+ *
+ * Le mode est appliqué une seule fois, sur le total, puis chaque compte est découpé
+ * dans le même rapport. L'appliquer compte par compte serait faux pour
+ * `reste_a_vivre_egal` : sa correction par les salaires se cumulerait autant de fois
+ * qu'il y a de comptes.
+ *
+ * La dernière personne reçoit le reste de chaque division, si bien que chaque compte
+ * est financé exactement. En contrepartie, le total versé par une personne peut
+ * s'écarter de sa part théorique de quelques centimes.
+ */
+export function repartirSurComptes(
+  mode: ModeRepartition,
+  personnes: Personne[],
+  comptes: Pick<CompteCalcule, 'id' | 'virementPermanentCents'>[],
+): Contribution[] {
+  if (personnes.length === 0) return []
+
+  const total = comptes.reduce((s, c) => s + c.virementPermanentCents, 0)
+  const parts = repartir(mode, personnes, total)
+
+  return comptes.flatMap((compte) => {
+    let attribue = 0
+    return personnes.map((personne, i) => {
+      const montantCents =
+        i === personnes.length - 1
+          ? compte.virementPermanentCents - attribue
+          : total <= 0
+            ? 0
+            : Math.round((compte.virementPermanentCents * parts[i]!.partCents) / total)
+      attribue += montantCents
+      return { personneId: personne.id, compteId: compte.id, montantCents }
+    })
+  })
+}
+
+export interface BilanPersonne {
+  personneId: number
+  prenom: string
+  /** Somme de ses virements, tous comptes confondus. */
+  verseCents: number
+  /** Part de son salaire qu'elle y consacre, en pourcentage. */
+  partDuSalaire: number
+  /** Part de la charge commune qu'elle porte, en pourcentage. */
+  partDesCharges: number
+  resteAVivreCents: number
+}
+
+/**
+ * Bilan par personne, calculé sur les montants réellement paramétrés — pas sur la
+ * répartition théorique. C'est le seul endroit où l'on sait si le partage annoncé
+ * correspond à ce qui part vraiment des comptes.
+ */
+export function bilanCouple(
+  personnes: Personne[],
+  contributions: Contribution[],
+  totalChargesCents: number,
+): BilanPersonne[] {
+  const pourcent = (part: number, total: number) => (total <= 0 ? 0 : (part * 100) / total)
+
+  return personnes.map((personne) => {
+    const verseCents = contributions
+      .filter((c) => c.personneId === personne.id)
+      .reduce((s, c) => s + c.montantCents, 0)
+
+    return {
+      personneId: personne.id,
+      prenom: personne.prenom,
+      verseCents,
+      partDuSalaire: pourcent(verseCents, personne.salaireNetCents),
+      partDesCharges: pourcent(verseCents, totalChargesCents),
+      resteAVivreCents: personne.salaireNetCents - verseCents,
+    }
+  })
+}
+
 export function calculerCharge(charge: Charge): ChargeCalculee {
   return { ...charge, coutMensuelLisseCents: coutMensuelLisse(charge) }
 }
@@ -127,6 +225,7 @@ export function assemblerEtat(brut: {
   personnes: Personne[]
   categories: Categorie[]
   comptes: CompteBrut[]
+  contributions: Contribution[]
 }): EtatFoyer {
   const comptes: CompteCalcule[] = brut.comptes.map((compte) => ({
     id: compte.id,
@@ -155,6 +254,7 @@ export function assemblerEtat(brut: {
     personnes: brut.personnes,
     categories: brut.categories,
     comptes,
+    contributions: brut.contributions,
     totaux: {
       totalDuCycleCents: somme((c) => c.totalDuCycleCents),
       dejaPreleveCents: somme((c) => c.dejaPreleveCents),

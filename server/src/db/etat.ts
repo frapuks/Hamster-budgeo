@@ -3,6 +3,7 @@ import type {
   Budget,
   Categorie,
   Charge,
+  Contribution,
   Depense,
   EtatFoyer,
   ModeRepartition,
@@ -63,6 +64,15 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
     ORDER BY b.ordre, b.id
   `
 
+  const contributions = await sql<Contribution[]>`
+    SELECT co.personne_id AS "personneId", co.compte_id AS "compteId",
+           co.montant_cents AS "montantCents"
+    FROM contribution co
+    JOIN compte c ON c.id = co.compte_id
+    WHERE c.foyer_id = ${foyerId}
+    ORDER BY co.compte_id, co.personne_id
+  `
+
   const lignesDepenses = await sql<Depense[]>`
     SELECT d.id, d.budget_id AS "budgetId", d.personne_id AS "personneId", d.libelle,
            d.montant_cents AS "montantCents", d.date_depense AS "dateDepense"
@@ -94,6 +104,7 @@ export async function lireEtat(foyerId: number): Promise<EtatFoyer | null> {
     },
     personnes,
     categories,
+    contributions,
     comptes: comptes.map((compte) => ({
       ...compte,
       charges: charges.filter((c) => c.compteId === compte.id),

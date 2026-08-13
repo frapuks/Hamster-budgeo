@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   besoinDuCycle,
+  bilanCouple,
   coutAnnuel,
+  deltaCompte,
+  repartirSurComptes,
+  verseSurCompte,
   coutMensuelLisse,
   dejaPreleve,
   provisionMensuelle,
@@ -289,5 +293,109 @@ describe('repartir', () => {
 
   it('gère un foyer sans personne', () => {
     expect(repartir('moitie', [], 10000)).toEqual([])
+  })
+})
+
+
+describe('contributions du couple', () => {
+  const comptes = [
+    { id: 1, virementPermanentCents: 128942 },
+    { id: 2, virementPermanentCents: 104498 },
+    { id: 3, virementPermanentCents: 10600 },
+  ]
+  const couple = [personne(1, 'Hélène', 280000), personne(2, 'Francis', 220000)]
+
+  it('partage chaque compte en deux parts égales en mode moitié', () => {
+    const parts = repartirSurComptes('moitie', couple, comptes)
+    const compte1 = parts.filter((c) => c.compteId === 1).map((c) => c.montantCents)
+    expect(compte1).toEqual([64471, 64471])
+  })
+
+  it('suit le mode choisi plutôt que de toujours couper en deux', () => {
+    // 280 000 / 500 000 des revenus, appliqué au besoin de 1 289,42 € du compte.
+    const parts = repartirSurComptes('prorata_revenus', couple, comptes)
+    expect(parts.filter((c) => c.compteId === 1).map((c) => c.montantCents)).toEqual([72207, 56735])
+  })
+
+  it("n'applique la correction du reste à vivre égal qu'une fois", () => {
+    // Le total est 2 440,40 € et les salaires diffèrent de 600,00 € : l'écart entre les
+    // deux parts doit rester de 600,00 €, pas de 600,00 € par compte.
+    const parts = repartirSurComptes('reste_a_vivre_egal', couple, comptes)
+    const totalDe = (id: number) =>
+      parts.filter((c) => c.personneId === id).reduce((s, c) => s + c.montantCents, 0)
+    expect(totalDe(1) - totalDe(2)).toBe(60000)
+  })
+
+  it('finance chaque compte à l’euro près, quel que soit le mode', () => {
+    for (const mode of ['moitie', 'prorata_revenus', 'reste_a_vivre_egal'] as const) {
+      for (const compte of comptes) {
+        const verse = repartirSurComptes(mode, couple, comptes)
+          .filter((c) => c.compteId === compte.id)
+          .reduce((s, c) => s + c.montantCents, 0)
+        expect(verse).toBe(compte.virementPermanentCents)
+      }
+    }
+  })
+
+  it('donne le centime restant à la dernière personne', () => {
+    const parts = repartirSurComptes('moitie', couple, [{ id: 9, virementPermanentCents: 10501 }])
+    expect(parts.reduce((s, c) => s + c.montantCents, 0)).toBe(10501)
+    expect(parts[0]!.montantCents).not.toBe(parts[1]!.montantCents)
+  })
+
+  it('ne renvoie rien pour un foyer sans personne', () => {
+    expect(repartirSurComptes('moitie', [], comptes)).toEqual([])
+  })
+
+  it('gère un foyer sans aucune charge', () => {
+    const vide = repartirSurComptes('prorata_revenus', couple, [
+      { id: 1, virementPermanentCents: 0 },
+    ])
+    expect(vide.map((c) => c.montantCents)).toEqual([0, 0])
+  })
+
+  it('calcule un delta nul quand le compte est exactement alimenté', () => {
+    const parts = repartirSurComptes('moitie', couple, comptes)
+    for (const compte of comptes) expect(deltaCompte(compte, parts)).toBe(0)
+  })
+
+  it('signale un manque en négatif et un excédent en positif', () => {
+    const compte = { id: 1, virementPermanentCents: 100000 }
+    const verse = (montant: number) => [{ personneId: 1, compteId: 1, montantCents: montant }]
+    expect(deltaCompte(compte, verse(90000))).toBe(-10000)
+    expect(deltaCompte(compte, verse(112000))).toBe(12000)
+    expect(verseSurCompte(verse(90000), 2)).toBe(0)
+  })
+})
+
+describe('bilanCouple', () => {
+  const couple = [personne(1, 'Hélène', 280000), personne(2, 'Francis', 220000)]
+  const contributions = [
+    { personneId: 1, compteId: 1, montantCents: 100000 },
+    { personneId: 1, compteId: 2, montantCents: 40000 },
+    { personneId: 2, compteId: 1, montantCents: 60000 },
+  ]
+
+  it('additionne les virements de chacun et en déduit le reste à vivre', () => {
+    const [helene, francis] = bilanCouple(couple, contributions, 200000)
+    expect(helene!.verseCents).toBe(140000)
+    expect(helene!.resteAVivreCents).toBe(140000)
+    expect(francis!.verseCents).toBe(60000)
+    expect(francis!.resteAVivreCents).toBe(160000)
+  })
+
+  it('exprime les parts en pourcentage du salaire et de la charge commune', () => {
+    const [helene, francis] = bilanCouple(couple, contributions, 200000)
+    expect(helene!.partDuSalaire).toBeCloseTo(50)
+    expect(helene!.partDesCharges).toBeCloseTo(70)
+    expect(francis!.partDuSalaire).toBeCloseTo(27.27, 2)
+    expect(francis!.partDesCharges).toBeCloseTo(30)
+  })
+
+  it('ne divise pas par zéro sur un salaire ou une charge absents', () => {
+    const [bilan] = bilanCouple([personne(1, 'Sans revenu', 0)], [], 0)
+    expect(bilan!.partDuSalaire).toBe(0)
+    expect(bilan!.partDesCharges).toBe(0)
+    expect(bilan!.resteAVivreCents).toBe(0)
   })
 })

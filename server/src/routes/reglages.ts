@@ -9,7 +9,9 @@ import {
   reordonnerComptes,
   supprimerCompte,
 } from '../db/comptes.js'
+import { enregistrerContributions } from '../db/contributions.js'
 import { lireEtat } from '../db/etat.js'
+import type { Contribution } from '@hamsterbudgeo/shared/types.js'
 import { foyerDeLaRequete } from '../contexte.js'
 import { semer } from '../seed.js'
 
@@ -38,6 +40,28 @@ const corpsCategorie = {
     nom: { type: 'string', minLength: 1, maxLength: 40 },
     icone: { type: 'string', minLength: 1, maxLength: 30 },
     couleur: { type: 'string', minLength: 1, maxLength: 20 },
+  },
+  additionalProperties: false,
+} as const
+
+const corpsContributions = {
+  type: 'object',
+  required: ['contributions'],
+  properties: {
+    contributions: {
+      type: 'array',
+      maxItems: 200,
+      items: {
+        type: 'object',
+        required: ['personneId', 'compteId', 'montantCents'],
+        properties: {
+          personneId: { type: 'integer', minimum: 1 },
+          compteId: { type: 'integer', minimum: 1 },
+          montantCents: { type: 'integer', minimum: 0 },
+        },
+        additionalProperties: false,
+      },
+    },
   },
   additionalProperties: false,
 } as const
@@ -102,6 +126,17 @@ export async function routesReglages(app: FastifyInstance) {
       const foyerId = foyerDeLaRequete(req)
 
       await reordonnerComptes(foyerId, req.body.ids)
+      return lireEtat(foyerId)
+    },
+  )
+
+  app.post<{ Body: { contributions: Contribution[] } }>(
+    '/api/contributions',
+    { schema: { body: corpsContributions } },
+    async (req) => {
+      const foyerId = foyerDeLaRequete(req)
+
+      await enregistrerContributions(foyerId, req.body.contributions)
       return lireEtat(foyerId)
     },
   )

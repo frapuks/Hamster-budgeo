@@ -8,17 +8,10 @@ import { COULEURS } from '../theme.js'
 import { CoucheFixe } from './CoucheFixe.js'
 
 const ONGLETS = [
-  { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon, rattaches: [] },
-  { chemin: '/charges', libelle: 'Charges', Icone: ReceiptLongRoundedIcon, rattaches: [] },
-  // Les deux écrans de détail du couple ne sont pas sous `/couple` : sans ce
-  // rattachement explicite, l'onglet s'éteindrait dès qu'on les ouvre.
-  {
-    chemin: '/couple',
-    libelle: 'Couple',
-    Icone: PeopleAltRoundedIcon,
-    rattaches: ['/repartition', '/virements'],
-  },
-  { chemin: '/reglages', libelle: 'Réglages', Icone: SettingsRoundedIcon, rattaches: [] },
+  { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
+  { chemin: '/charges', libelle: 'Charges', Icone: ReceiptLongRoundedIcon },
+  { chemin: '/couple', libelle: 'Couple', Icone: PeopleAltRoundedIcon },
+  { chemin: '/reglages', libelle: 'Réglages', Icone: SettingsRoundedIcon },
 ] as const
 
 export function BarreOnglets() {
@@ -30,8 +23,7 @@ export function BarreOnglets() {
   const actif = ONGLETS.reduce(
     (meilleur, onglet, index) =>
       pathname === onglet.chemin ||
-      (onglet.chemin !== '/' && pathname.startsWith(`${onglet.chemin}/`)) ||
-      onglet.rattaches.some((c) => pathname === c || pathname.startsWith(`${c}/`))
+      (onglet.chemin !== '/' && pathname.startsWith(`${onglet.chemin}/`))
         ? index
         : meilleur,
     0,

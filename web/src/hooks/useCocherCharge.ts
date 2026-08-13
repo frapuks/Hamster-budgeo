@@ -13,6 +13,7 @@ function etatApresCochage(etat: EtatFoyer, chargeId: number, estPrelevee: boolea
     foyer: etat.foyer,
     personnes: etat.personnes,
     categories: etat.categories,
+    contributions: etat.contributions,
     comptes: etat.comptes.map((compte) => ({
       ...compte,
       charges: compte.charges.map((c) => (c.id === chargeId ? { ...c, estPrelevee } : c)),

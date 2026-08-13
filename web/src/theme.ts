@@ -32,6 +32,9 @@ export const COULEURS = {
   corail: CORAIL,
 } as const
 
+/** Une teinte par personne du foyer, dans l'ordre d'affichage. */
+export const TEINTES_PERSONNE = ['#B98CFF', '#4ECDC4'] as const
+
 /** L'app reste dans cette colonne centrée sur grand écran plutôt que de s'étirer. */
 export const LARGEUR_MOBILE = 460
 

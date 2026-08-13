@@ -21,6 +21,7 @@ import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { Categorie, CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
 import { BoutonAjouter } from '../components/BoutonAjouter.js'
+import { BoutonEdition } from '../components/BoutonEdition.js'
 import { Carte } from '../components/Carte.js'
 import { Section } from '../components/Section.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
@@ -31,30 +32,6 @@ import { TuileCategorie, COULEURS_CATEGORIE, type CouleurCategorie } from '../co
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { COULEURS, RAYONS } from '../theme.js'
-
-/**
- * Action d'en-tête de section. Texte cliquable plutôt qu'un Button : celui-ci porte
- * 12 px de retrait vertical dans le thème, ce qui étirerait la ligne de titre.
- */
-function ActionTexte({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return (
-    <Typography
-      component="button"
-      variant="libelle"
-      onClick={onClick}
-      sx={{
-        background: 'none',
-        border: 'none',
-        p: 0,
-        cursor: 'pointer',
-        color: COULEURS.bleuClair,
-        fontFamily: 'inherit',
-      }}
-    >
-      {children}
-    </Typography>
-  )
-}
 
 const NOMS_ROLE: Record<string, string> = {
   prelevements: 'Prélèvements',
@@ -284,9 +261,12 @@ export function Reglages() {
       <Section
         titre={`Catégories (${etat.categories.length})`}
         action={
-          <ActionTexte onClick={() => setEditionCategories((e) => !e)}>
-            {editionCategories ? 'Terminer' : 'Modifier'}
-          </ActionTexte>
+          <BoutonEdition
+            actif={editionCategories}
+            labelModifier="Modifier les catégories"
+            labelTerminer="Terminer la modification des catégories"
+            onClick={() => setEditionCategories((e) => !e)}
+          />
         }
       >
         <Carte sx={{ p: 1.75 }}>

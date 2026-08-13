@@ -13,8 +13,6 @@ import { DetailCompte } from './pages/DetailCompte.js'
 import { FormulaireBudget } from './pages/FormulaireBudget.js'
 import { FormulaireCharge } from './pages/FormulaireCharge.js'
 import { Reglages } from './pages/Reglages.js'
-import { Repartition } from './pages/Repartition.js'
-import { Virements } from './pages/Virements.js'
 import { LARGEUR_MOBILE } from './theme.js'
 
 /**
@@ -83,8 +81,6 @@ export function App() {
         <Route path="/budgets/:id/modifier" element={<FormulaireBudget />} />
         <Route path="/budgets/:id" element={<DetailBudget />} />
         <Route path="/couple" element={<Couple />} />
-        <Route path="/repartition" element={<Repartition />} />
-        <Route path="/virements" element={<Virements />} />
         <Route path="/reglages" element={<Reglages />} />
         <Route path="/demo" element={<Demo />} />
       </Routes>

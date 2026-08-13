@@ -106,6 +106,13 @@ export interface Repartition {
   parts: PartRepartition[]
 }
 
+/** Ce qu'une personne verse sur un compte donné, tel qu'elle l'a paramétré. */
+export interface Contribution {
+  personneId: number
+  compteId: number
+  montantCents: number
+}
+
 export interface EtatFoyer {
   foyer: {
     id: number
@@ -116,6 +123,7 @@ export interface EtatFoyer {
   personnes: Personne[]
   categories: Categorie[]
   comptes: CompteCalcule[]
+  contributions: Contribution[]
   totaux: {
     totalDuCycleCents: number
     dejaPreleveCents: number

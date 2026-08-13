@@ -1,4 +1,5 @@
 import type {
+  Contribution,
   EtatFoyer,
   ModeRepartition,
   RoleCompte,
@@ -133,6 +134,10 @@ export const api = {
     patch<EtatFoyer>(`/api/comptes/${id}`, saisie),
   supprimerCompte: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/comptes/${id}`),
   reordonnerComptes: (ids: number[]) => envoyer<EtatFoyer>('POST', '/api/comptes/ordre', { ids }),
+
+  /** Une ligne ou toute la grille : le serveur applique la liste telle quelle. */
+  enregistrerContributions: (contributions: Contribution[]) =>
+    envoyer<EtatFoyer>('POST', '/api/contributions', { contributions }),
 
   creerCategorie: (saisie: SaisieCategorie) =>
     envoyer<EtatFoyer>('POST', '/api/categories', saisie),
