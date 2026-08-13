@@ -27,7 +27,7 @@ import { COULEURS, RAYONS } from '../theme.js'
 
 export function FormulaireBudget() {
   const { id } = useParams<{ id: string }>()
-  const retour = useRetour('/budgets')
+  const retour = useRetour('/')
   const queryClient = useQueryClient()
   const { data: etat, isPending, isError } = useEtat()
   const [confirmationSuppression, setConfirmationSuppression] = useState(false)

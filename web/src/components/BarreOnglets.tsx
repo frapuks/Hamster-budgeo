@@ -1,7 +1,6 @@
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded'
-import PieChartRoundedIcon from '@mui/icons-material/PieChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { COULEURS } from '../theme.js'
@@ -10,7 +9,6 @@ import { CoucheFixe } from './CoucheFixe.js'
 const ONGLETS = [
   { chemin: '/', libelle: 'Accueil', Icone: HomeRoundedIcon },
   { chemin: '/charges', libelle: 'Charges', Icone: ReceiptLongRoundedIcon },
-  { chemin: '/budgets', libelle: 'Budgets', Icone: PieChartRoundedIcon },
   { chemin: '/reglages', libelle: 'Réglages', Icone: SettingsRoundedIcon },
 ] as const
 

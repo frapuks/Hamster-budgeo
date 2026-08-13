@@ -8,6 +8,14 @@ export interface SaisieCompte {
   couleur: string
 }
 
+/** Sert à refuser le chargement de la démonstration sur un foyer déjà rempli. */
+export async function compterComptes(foyerId: number): Promise<number> {
+  const [ligne] = await sql<{ n: number }[]>`
+    SELECT count(*)::int AS n FROM compte WHERE foyer_id = ${foyerId}
+  `
+  return ligne?.n ?? 0
+}
+
 export async function creerCompte(foyerId: number, saisie: SaisieCompte): Promise<boolean> {
   const lignes = await sql`
     INSERT INTO compte (foyer_id, nom, banque, role, couleur, ordre)

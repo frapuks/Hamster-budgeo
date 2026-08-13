@@ -54,14 +54,10 @@ export function Reglages() {
   const [compteEdite, setCompteEdite] = useState<CompteCalcule | undefined>()
   const [feuilleOuverte, setFeuilleOuverte] = useState(false)
   const [compteASupprimer, setCompteASupprimer] = useState<CompteCalcule | null>(null)
-  const [confirmationEffacement, setConfirmationEffacement] = useState(false)
-  const [confirmationDemo, setConfirmationDemo] = useState(false)
 
   const surSucces = (nouvelEtat: EtatFoyer) => queryClient.setQueryData(CLE_ETAT, nouvelEtat)
   const reordonner = useMutation({ mutationFn: api.reordonnerComptes, onSuccess: surSucces })
   const supprimerCompte = useMutation({ mutationFn: api.supprimerCompte, onSuccess: surSucces })
-  const chargerDemo = useMutation({ mutationFn: api.chargerDemo, onSuccess: surSucces })
-  const toutEffacer = useMutation({ mutationFn: api.toutEffacer, onSuccess: surSucces })
   const invitation = useMutation({ mutationFn: api.creerInvitation })
 
   /**
@@ -272,17 +268,6 @@ export function Reglages() {
         </Stack>
       </Section>
 
-      <Section titre="Données">
-        <Stack spacing={1.25}>
-          <Button variant="outlined" fullWidth onClick={() => setConfirmationDemo(true)}>
-            Charger les données de démonstration
-          </Button>
-          <Button variant="text" color="error" fullWidth onClick={() => setConfirmationEffacement(true)}>
-            Tout effacer et repartir de zéro
-          </Button>
-        </Stack>
-      </Section>
-
       <FeuilleCompte
         ouverte={feuilleOuverte}
         onFermer={() => setFeuilleOuverte(false)}
@@ -304,29 +289,7 @@ export function Reglages() {
         onAnnuler={() => setCompteASupprimer(null)}
       />
 
-      <DialogueConfirmation
-        ouvert={confirmationDemo}
-        titre="Charger les données de démonstration ?"
-        message="Tes comptes, charges et budgets actuels seront remplacés par le jeu d'exemple. Cette action est irréversible."
-        libelleAction="Charger la démonstration"
-        onConfirmer={() => {
-          setConfirmationDemo(false)
-          chargerDemo.mutate()
-        }}
-        onAnnuler={() => setConfirmationDemo(false)}
-      />
 
-      <DialogueConfirmation
-        ouvert={confirmationEffacement}
-        titre="Tout effacer ?"
-        message="Tous tes comptes, charges, budgets et dépenses seront supprimés. Les prénoms et les salaires du foyer sont conservés. Cette action est irréversible."
-        libelleAction="Tout effacer"
-        onConfirmer={() => {
-          setConfirmationEffacement(false)
-          toutEffacer.mutate()
-        }}
-        onAnnuler={() => setConfirmationEffacement(false)}
-      />
     </Stack>
   )
 }

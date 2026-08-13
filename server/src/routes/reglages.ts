@@ -3,12 +3,12 @@ import type { SaisieCategorie } from '../db/categories.js'
 import { creerCategorie, supprimerCategorie } from '../db/categories.js'
 import type { SaisieCompte } from '../db/comptes.js'
 import {
+  compterComptes,
   creerCompte,
   modifierCompte,
   reordonnerComptes,
   supprimerCompte,
 } from '../db/comptes.js'
-import { viderFoyer } from '../db/donnees.js'
 import { lireEtat } from '../db/etat.js'
 import { foyerDeLaRequete } from '../contexte.js'
 import { semer } from '../seed.js'
@@ -133,21 +133,16 @@ export async function routesReglages(app: FastifyInstance) {
   app.post(
     '/api/donnees/demo',
     { schema: { body: { type: 'object', additionalProperties: false } } },
-    async (req) => {
-      // Variante ciblée du seed : elle remplace le contenu budgétaire du foyer sans
-      // toucher aux personnes ni aux comptes utilisateurs.
+    async (req, reply) => {
       const foyerId = foyerDeLaRequete(req)
-      await semer(foyerId)
-      return lireEtat(foyerId)
-    },
-  )
 
-  app.post(
-    '/api/donnees/effacer',
-    { schema: { body: { type: 'object', additionalProperties: false } } },
-    async (req) => {
-      const foyerId = foyerDeLaRequete(req)
-      await viderFoyer(foyerId)
+      // Réservé à un foyer vide, comme l'interface le propose. Sans ce garde-fou, un
+      // onglet resté ouvert ou un appel direct effacerait des mois de saisie.
+      if ((await compterComptes(foyerId)) > 0) {
+        return reply.code(409).send({ erreur: 'Le foyer contient déjà des comptes.' })
+      }
+
+      await semer(foyerId)
       return lireEtat(foyerId)
     },
   )

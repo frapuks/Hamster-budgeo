@@ -1,10 +1,9 @@
 import { Box, CircularProgress } from '@mui/material'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { ErreurApi } from './api/client.js'
 import { BarreOnglets } from './components/BarreOnglets.js'
 import { useEtat } from './hooks/useEtat.js'
 import { Accueil } from './pages/Accueil.js'
-import { Budgets } from './pages/Budgets.js'
 import { Charges } from './pages/Charges.js'
 import { Connexion } from './pages/Connexion.js'
 import { Demo } from './pages/Demo.js'
@@ -76,7 +75,9 @@ export function App() {
         {/* Chemins littéraux avant la route paramétrée, sinon `:id` capte le mot. */}
         <Route path="/charges/nouvelle" element={<FormulaireCharge />} />
         <Route path="/charges/:id" element={<FormulaireCharge />} />
-        <Route path="/budgets" element={<Budgets />} />
+        {/* L'ancien onglet Budgets vit désormais dans l'accueil : on redirige plutôt
+            que de laisser un écran vide aux marque-pages et à l'app installée. */}
+        <Route path="/budgets" element={<Navigate to="/" replace />} />
         <Route path="/budgets/nouveau" element={<FormulaireBudget />} />
         <Route path="/budgets/:id/modifier" element={<FormulaireBudget />} />
         <Route path="/budgets/:id" element={<DetailBudget />} />

@@ -28,7 +28,7 @@ import { COULEURS } from '../theme.js'
 export function DetailBudget() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const retour = useRetour('/budgets')
+  const retour = useRetour('/')
   const { data: etat, isPending, isError } = useEtat()
   const supprimer = useSupprimerDepense()
   const [saisieOuverte, setSaisieOuverte] = useState(false)

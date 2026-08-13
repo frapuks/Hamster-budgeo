@@ -138,7 +138,6 @@ export const api = {
   supprimerCategorie: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/categories/${id}`),
 
   chargerDemo: () => envoyer<EtatFoyer>('POST', '/api/donnees/demo'),
-  toutEffacer: () => envoyer<EtatFoyer>('POST', '/api/donnees/effacer'),
 
   moi: () => get<{ email: string; personneId: number | null }>('/api/auth/moi'),
   inscription: (saisie: {
