@@ -11,9 +11,11 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { CompteCalcule, EtatFoyer, RoleCompte } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { CLE_ETAT } from '../hooks/useEtat.js'
+import { DialogueConfirmation } from './DialogueConfirmation.js'
 import { COULEURS_CATEGORIE, type CouleurCategorie } from './TuileCategorie.js'
 import { RAYONS } from '../theme.js'
 
@@ -44,6 +46,7 @@ export function FeuilleCompte({
   const [banque, setBanque] = useState('')
   const [role, setRole] = useState<RoleCompte>('prelevements')
   const [couleur, setCouleur] = useState<CouleurCategorie>('bleu')
+  const [confirmationSuppression, setConfirmationSuppression] = useState(false)
 
   useEffect(() => {
     if (!ouverte) return
@@ -51,6 +54,7 @@ export function FeuilleCompte({
     setBanque(compte?.banque ?? '')
     setRole(compte?.role ?? 'prelevements')
     setCouleur((compte?.couleur as CouleurCategorie) ?? 'bleu')
+    setConfirmationSuppression(false)
   }, [ouverte, compte])
 
   const surSucces = (etat: EtatFoyer) => {
@@ -63,6 +67,8 @@ export function FeuilleCompte({
       compte ? api.modifierCompte(compte.id, saisie) : api.creerCompte(saisie),
     onSuccess: surSucces,
   })
+
+  const suppression = useMutation({ mutationFn: api.supprimerCompte, onSuccess: surSucces })
 
   const valide = nom.trim().length > 0
 
@@ -147,7 +153,36 @@ export function FeuilleCompte({
         >
           {enregistrement.isPending ? 'Enregistrement…' : 'Enregistrer'}
         </Button>
+
+        {compte && (
+          <Button
+            variant="text"
+            color="error"
+            fullWidth
+            disabled={suppression.isPending}
+            onClick={() => setConfirmationSuppression(true)}
+          >
+            Supprimer ce compte
+          </Button>
+        )}
       </Stack>
+
+      {/* La suppression la plus lourde de l'application : le message dit exactement ce
+          qui part avec le compte. */}
+      <DialogueConfirmation
+        ouvert={confirmationSuppression}
+        titre="Supprimer ce compte ?"
+        message={
+          compte
+            ? `« ${compte.nom} » sera effacé, ainsi que ses ${compte.charges.length} charge(s) et ${compte.budgets.length} budget(s). Le total à virer chaque mois diminuera de ${formatEuros(compte.virementPermanentCents)}.`
+            : ''
+        }
+        onConfirmer={() => {
+          setConfirmationSuppression(false)
+          if (compte) suppression.mutate(compte.id)
+        }}
+        onAnnuler={() => setConfirmationSuppression(false)}
+      />
     </Drawer>
   )
 }

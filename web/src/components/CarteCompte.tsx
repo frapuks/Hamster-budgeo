@@ -14,31 +14,38 @@ import { Carte } from './Carte.js'
  *   • courant      → prélèvements restants + budgets restants
  *   • provisions   → le virement à faire, il n'y a rien à cocher
  */
-function chiffreDuCompte(compte: CompteCalcule): { montantCents: number; legende: string } {
-  const cochees = compte.charges.filter((c) => c.type === 'mensuelle' && c.estPrelevee).length
-  const total = compte.charges.filter((c) => c.type === 'mensuelle').length
+function chiffreDuCompte(compte: CompteCalcule): {
+  montantCents: number
+  libelle: string
+  detail: string
+} {
+  const mensuelles = compte.charges.filter((c) => c.type === 'mensuelle')
+  const cochees = mensuelles.filter((c) => c.estPrelevee).length
 
   switch (compte.role) {
     case 'prelevements':
       return {
         montantCents: compte.resteASortirCents,
-        legende: `reste à sortir · ${cochees} charge${cochees > 1 ? 's' : ''} sur ${total} cochée${cochees > 1 ? 's' : ''}`,
+        libelle: 'reste à sortir',
+        detail: `${cochees} sur ${mensuelles.length} cochées`,
       }
     case 'courant':
       return {
         montantCents: compte.besoinDuCycleCents,
-        legende: `${formatEuros(compte.resteASortirCents)} de charges + ${formatEuros(compte.resteADepenserCents)} de budgets`,
+        libelle: 'à couvrir',
+        detail: `${formatEuros(compte.resteASortirCents)} de charges + ${formatEuros(compte.resteADepenserCents)} de budgets`,
       }
     case 'provisions':
       return {
         montantCents: compte.virementPermanentCents,
-        legende: 'à virer ce cycle',
+        libelle: 'à virer ce cycle',
+        detail: `${formatEuros(compte.provisionMensuelleCents * 12)} de charges dans l'année`,
       }
   }
 }
 
 export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClick?: () => void }) {
-  const { montantCents, legende } = chiffreDuCompte(compte)
+  const { montantCents, libelle, detail } = chiffreDuCompte(compte)
   const progression = proportionRestante(compte.resteASortirCents, compte.totalDuCycleCents)
 
   const pastille =
@@ -47,49 +54,50 @@ export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClic
       : 'ardoise']
 
   return (
-    <Carte
-      onClick={onClick}
-      sx={{
-        minWidth: 260,
-        scrollSnapAlign: 'start',
-        cursor: onClick ? 'pointer' : 'default',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.25 }}>
-        <Box sx={{ width: 8, height: 8, borderRadius: '999px', backgroundColor: pastille }} />
-        <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', flexGrow: 1 }} noWrap>
-          {compte.nom}
-        </Typography>
-        <Typography variant="body2" sx={{ fontSize: '0.75rem' }} noWrap>
-          {compte.banque}
-        </Typography>
+    <Carte onClick={onClick} sx={{ p: 1.75, cursor: onClick ? 'pointer' : 'default' }}>
+      <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Box
+          sx={{ width: 8, height: 8, borderRadius: '999px', backgroundColor: pastille, flexShrink: 0 }}
+        />
+
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Typography sx={{ fontWeight: 600 }} noWrap>
+            {compte.nom}
+          </Typography>
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }} noWrap>
+            {compte.banque} · {detail}
+          </Typography>
+        </Box>
+
+        <Stack alignItems="flex-end" sx={{ flexShrink: 0 }}>
+          <Typography variant="montantCarte" sx={{ fontSize: '1.25rem' }}>
+            {formatEuros(montantCents)}
+          </Typography>
+          <Typography variant="body2" sx={{ fontSize: '0.6875rem' }}>
+            {libelle}
+          </Typography>
+        </Stack>
       </Stack>
 
-      <Typography variant="montantCarte" sx={{ mb: 0.5 }}>
-        {formatEuros(montantCents)}
-      </Typography>
-      <Typography variant="body2" sx={{ fontSize: '0.75rem', mb: 1.5 }}>
-        {legende}
-      </Typography>
-
+      {/* Le compte de provisions n'a rien à cocher : une jauge n'y aurait aucun sens. */}
       {compte.role !== 'provisions' && (
         <LinearProgress
           variant="determinate"
           value={progression}
           color="secondary"
-          sx={{ mb: 1.5, height: 6 }}
+          sx={{ mt: 1.5, height: 6 }}
         />
       )}
 
-      <Box sx={{ mt: 'auto' }}>
+      {/* Sur le compte de provisions, le virement EST déjà le montant affiché. */}
+      {compte.role !== 'provisions' && (
         <Chip
           size="small"
           icon={<AutorenewRoundedIcon sx={{ fontSize: 15 }} />}
           label={`Virement ${formatEuros(compte.virementPermanentCents)}/mois`}
+          sx={{ mt: 1.5 }}
         />
-      </Box>
+      )}
     </Carte>
   )
 }

@@ -46,6 +46,25 @@ export async function modifierBudget(
   return lignes.length > 0
 }
 
+/**
+ * Réécrit tous les rangs plutôt que d'échanger deux lignes, comme pour les comptes.
+ *
+ * Le rang est global au foyer, pas propre à un compte : c'est déjà ce que fait
+ * `creerBudget`, et c'est ce qui permet à l'accueil de présenter une liste unique.
+ */
+export async function reordonnerBudgets(foyerId: number, ids: number[]): Promise<void> {
+  if (ids.length === 0) return
+  await sql.begin(async (tx) => {
+    for (const [rang, id] of ids.entries()) {
+      await tx`
+        UPDATE budget b SET ordre = ${rang}
+        FROM compte c
+        WHERE b.compte_id = c.id AND b.id = ${id} AND c.foyer_id = ${foyerId}
+      `
+    }
+  })
+}
+
 /** Supprime un budget, et ses dépenses avec lui (`ON DELETE CASCADE`). */
 export async function supprimerBudget(foyerId: number, budgetId: number): Promise<boolean> {
   const lignes = await sql`

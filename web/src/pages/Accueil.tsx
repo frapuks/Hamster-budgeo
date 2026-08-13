@@ -80,7 +80,7 @@ export function Accueil() {
   const { totaux, comptes, foyer } = etat
   const progression = proportionRestante(totaux.resteASortirCents, totaux.totalDuCycleCents)
 
-  const budgets = comptes.flatMap((c) => c.budgets)
+  const budgets = comptes.flatMap((c) => c.budgets).sort((a, b) => a.ordre - b.ordre)
 
   /**
    * Foyer vide : l'écran habituel n'afficherait qu'une coquille — un héros à zéro, un
@@ -169,28 +169,8 @@ export function Accueil() {
       </Stack>
 
       <Box>
-        <EnTeteSection titre="Mes comptes" action={`${comptes.length} comptes`} />
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1.5,
-            overflowX: 'auto',
-            scrollSnapType: 'x mandatory',
-            // Les cartes débordent jusqu'aux bords plutôt que d'être coupées net.
-            mx: -2,
-            px: 2,
-            // Indispensable avec le débordement ci-dessus : sans lui, l'accroche aligne
-            // les cartes sur le bord de la zone de défilement en ignorant le padding,
-            // et la première vient se coller au bord de l'écran.
-            //
-            // ⚠️ En pixels explicites : `sx` ne convertit l'unité d'espacement que pour
-            // une liste connue de propriétés (margin, padding, gap…), dont
-            // `scroll-padding` ne fait pas partie. Un `2` y vaudrait 2 px, pas 16.
-            scrollPaddingInline: '16px',
-            pb: 1,
-            '&::-webkit-scrollbar': { display: 'none' },
-          }}
-        >
+        <EnTeteSection titre="Mes comptes" />
+        <Stack spacing={1.25}>
           {comptes.map((compte) => (
             <CarteCompte
               key={compte.id}
@@ -198,32 +178,11 @@ export function Accueil() {
               onClick={() => navigate(`/comptes/${compte.id}`)}
             />
           ))}
-        </Box>
+        </Stack>
       </Box>
 
       <Box>
-        <EnTeteSection
-          titre="Mes budgets"
-          action={
-            // Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
-            // vertical dans le thème, ce qui étirait la ligne de titre.
-            <Typography
-              component="button"
-              variant="libelle"
-              onClick={() => navigate('/budgets/nouveau')}
-              sx={{
-                background: 'none',
-                border: 'none',
-                p: 0,
-                cursor: 'pointer',
-                color: COULEURS.bleuClair,
-                fontFamily: 'inherit',
-              }}
-            >
-              Ajouter
-            </Typography>
-          }
-        />
+        <EnTeteSection titre="Mes budgets" />
 
         {budgets.length === 0 ? (
           <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>

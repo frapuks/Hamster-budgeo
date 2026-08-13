@@ -14,12 +14,12 @@ import { useNavigate } from 'react-router-dom'
 import { coutAnnuel, coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { ChargeCalculee, CompteCalcule } from '@hamsterbudgeo/shared/types.js'
+import { BoutonAjouter } from '../components/BoutonAjouter.js'
 import { Carte } from '../components/Carte.js'
 import { PuceType } from '../components/PuceType.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { couleurDe, iconeDe } from '../icones.js'
-import { COULEURS } from '../theme.js'
 
 function Stat({ libelle, valeur }: { libelle: string; valeur: string }) {
   return (
@@ -143,23 +143,7 @@ export function Charges() {
     <Stack spacing={2.5} sx={{ pb: 2 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
         <Typography variant="titreSection">Mes charges</Typography>
-        {/* Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
-            vertical dans le thème, ce qui étirerait la ligne de titre. */}
-        <Typography
-          component="button"
-          variant="libelle"
-          onClick={() => navigate('/charges/nouvelle')}
-          sx={{
-            background: 'none',
-            border: 'none',
-            p: 0,
-            cursor: 'pointer',
-            color: COULEURS.bleuClair,
-            fontFamily: 'inherit',
-          }}
-        >
-          Ajouter
-        </Typography>
+        <BoutonAjouter label="Ajouter une charge" onClick={() => navigate('/charges/nouvelle')} />
       </Stack>
 
       <Carte>

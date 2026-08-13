@@ -1,6 +1,11 @@
 import type { FastifyInstance } from 'fastify'
 import type { SaisieBudget } from '../db/budgets.js'
-import { creerBudget, modifierBudget, supprimerBudget } from '../db/budgets.js'
+import {
+  creerBudget,
+  modifierBudget,
+  reordonnerBudgets,
+  supprimerBudget,
+} from '../db/budgets.js'
 import { lireEtat } from '../db/etat.js'
 import { foyerDeLaRequete } from '../contexte.js'
 
@@ -14,6 +19,13 @@ const corpsBudget = {
     // Entier : un budget est en centimes, jamais en euros décimaux.
     montantMensuelCents: { type: 'integer', minimum: 1 },
   },
+  additionalProperties: false,
+} as const
+
+const corpsOrdre = {
+  type: 'object',
+  required: ['ids'],
+  properties: { ids: { type: 'array', items: { type: 'integer', minimum: 1 } } },
   additionalProperties: false,
 } as const
 
@@ -36,6 +48,17 @@ export async function routesBudgets(app: FastifyInstance) {
       if (!creee) return reply.code(404).send({ erreur: 'Compte introuvable.' })
 
       return reply.code(201).send(await lireEtat(foyerId))
+    },
+  )
+
+  app.post<{ Body: { ids: number[] } }>(
+    '/api/budgets/ordre',
+    { schema: { body: corpsOrdre } },
+    async (req) => {
+      const foyerId = foyerDeLaRequete(req)
+
+      await reordonnerBudgets(foyerId, req.body.ids)
+      return lireEtat(foyerId)
     },
   )
 

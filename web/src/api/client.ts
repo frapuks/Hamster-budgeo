@@ -119,6 +119,7 @@ export const api = {
   modifierBudget: (id: number, saisie: SaisieBudget) =>
     patch<EtatFoyer>(`/api/budgets/${id}`, saisie),
   supprimerBudget: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/budgets/${id}`),
+  reordonnerBudgets: (ids: number[]) => envoyer<EtatFoyer>('POST', '/api/budgets/ordre', { ids }),
 
   demarrerNouveauCycle: () => envoyer<EtatFoyer>('POST', '/api/cycle/reset'),
 

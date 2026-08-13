@@ -37,6 +37,7 @@ function budget(montantCents: number, depenses: number[] = []): Budget {
     compteId: 1,
     nom: 'Budget',
     montantMensuelCents: montantCents,
+    ordre: 0,
     categorie: null,
     depenses: depenses.map((m) => ({
       id: ++compteur,

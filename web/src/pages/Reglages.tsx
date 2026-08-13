@@ -15,7 +15,6 @@ import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded'
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
-import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
@@ -23,6 +22,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { Categorie, CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
+import { BoutonAjouter } from '../components/BoutonAjouter.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleCategorie } from '../components/FeuilleCategorie.js'
@@ -59,6 +59,30 @@ function Section({
   )
 }
 
+/**
+ * Action d'en-tête de section. Texte cliquable plutôt qu'un Button : celui-ci porte
+ * 12 px de retrait vertical dans le thème, ce qui étirerait la ligne de titre.
+ */
+function ActionTexte({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <Typography
+      component="button"
+      variant="libelle"
+      onClick={onClick}
+      sx={{
+        background: 'none',
+        border: 'none',
+        p: 0,
+        cursor: 'pointer',
+        color: COULEURS.bleuClair,
+        fontFamily: 'inherit',
+      }}
+    >
+      {children}
+    </Typography>
+  )
+}
+
 const NOMS_ROLE: Record<string, string> = {
   prelevements: 'Prélèvements',
   courant: 'Courant',
@@ -72,7 +96,6 @@ export function Reglages() {
 
   const [compteEdite, setCompteEdite] = useState<CompteCalcule | undefined>()
   const [feuilleOuverte, setFeuilleOuverte] = useState(false)
-  const [compteASupprimer, setCompteASupprimer] = useState<CompteCalcule | null>(null)
   const [cycleOuvert, setCycleOuvert] = useState(false)
   const [categorieOuverte, setCategorieOuverte] = useState(false)
   const [categorieASupprimer, setCategorieASupprimer] = useState<Categorie | null>(null)
@@ -80,7 +103,10 @@ export function Reglages() {
 
   const surSucces = (nouvelEtat: EtatFoyer) => queryClient.setQueryData(CLE_ETAT, nouvelEtat)
   const reordonner = useMutation({ mutationFn: api.reordonnerComptes, onSuccess: surSucces })
-  const supprimerCompte = useMutation({ mutationFn: api.supprimerCompte, onSuccess: surSucces })
+  const reordonnerBudgets = useMutation({
+    mutationFn: api.reordonnerBudgets,
+    onSuccess: surSucces,
+  })
   const supprimerCategorie = useMutation({
     mutationFn: api.supprimerCategorie,
     onSuccess: surSucces,
@@ -119,6 +145,18 @@ export function Reglages() {
     if (cible < 0 || cible >= ids.length) return
     ;[ids[index], ids[cible]] = [ids[cible]!, ids[index]!]
     reordonner.mutate(ids)
+  }
+
+  const budgets = etat.comptes.flatMap((c) => c.budgets).sort((a, b) => a.ordre - b.ordre)
+  const nomDuCompte = (compteId: number) =>
+    etat.comptes.find((c) => c.id === compteId)?.nom ?? ''
+
+  const deplacerBudget = (index: number, direction: -1 | 1) => {
+    const ids = budgets.map((b) => b.id)
+    const cible = index + direction
+    if (cible < 0 || cible >= ids.length) return
+    ;[ids[index], ids[cible]] = [ids[cible]!, ids[index]!]
+    reordonnerBudgets.mutate(ids)
   }
 
   /** Charges et budgets rattachés à une catégorie. */
@@ -166,7 +204,10 @@ export function Reglages() {
         </Carte>
       </Section>
 
-      <Section titre="Comptes bancaires">
+      <Section
+        titre="Comptes bancaires"
+        action={<BoutonAjouter label="Ajouter un compte" onClick={() => ouvrirCompte()} />}
+      >
         <Stack spacing={1.25}>
           {etat.comptes.map((compte, index) => (
             <Carte key={compte.id} sx={{ p: 1.5 }}>
@@ -218,44 +259,83 @@ export function Reglages() {
                 <IconButton size="small" aria-label={`Modifier ${compte.nom}`} onClick={() => ouvrirCompte(compte)}>
                   <EditRoundedIcon fontSize="small" />
                 </IconButton>
+              </Stack>
+            </Carte>
+          ))}
+        </Stack>
+      </Section>
+
+      <Section
+        titre="Budgets"
+        action={<BoutonAjouter label="Ajouter un budget" onClick={() => navigate('/budgets/nouveau')} />}
+      >
+        <Stack spacing={1.25}>
+          {budgets.map((budget, index) => (
+            <Carte key={budget.id} sx={{ p: 1.5 }}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack sx={{ mr: 0.5 }}>
+                  <IconButton
+                    size="small"
+                    aria-label={`Monter ${budget.nom}`}
+                    disabled={index === 0 || reordonnerBudgets.isPending}
+                    onClick={() => deplacerBudget(index, -1)}
+                    sx={{ p: 0.25 }}
+                  >
+                    <ArrowUpwardRoundedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    aria-label={`Descendre ${budget.nom}`}
+                    disabled={index === budgets.length - 1 || reordonnerBudgets.isPending}
+                    onClick={() => deplacerBudget(index, 1)}
+                    sx={{ p: 0.25 }}
+                  >
+                    <ArrowDownwardRoundedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Stack>
+
+                <TuileCategorie
+                  Icone={iconeDe(budget.categorie?.icone)}
+                  couleur={couleurDe(budget.categorie?.couleur)}
+                  taille={32}
+                />
+
+                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontWeight: 600 }} noWrap>
+                    {budget.nom}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: '0.75rem' }} noWrap>
+                    {formatEuros(budget.montantMensuelCents)}/mois · {nomDuCompte(budget.compteId)}
+                  </Typography>
+                </Box>
+
+                {/* Pas d'icône de suppression ici : elle vit dans le formulaire, avec sa
+                    confirmation, et la dupliquer reviendrait à dupliquer le dialogue. */}
                 <IconButton
                   size="small"
-                  aria-label={`Supprimer ${compte.nom}`}
-                  onClick={() => setCompteASupprimer(compte)}
+                  aria-label={`Modifier ${budget.nom}`}
+                  onClick={() => navigate(`/budgets/${budget.id}/modifier`)}
                 >
-                  <DeleteOutlineRoundedIcon fontSize="small" />
+                  <EditRoundedIcon fontSize="small" />
                 </IconButton>
               </Stack>
             </Carte>
           ))}
 
-          <Button variant="outlined" fullWidth startIcon={<AddRoundedIcon />} onClick={() => ouvrirCompte()}>
-            Ajouter un compte
-          </Button>
+          {budgets.length === 0 && (
+            <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
+              Aucun budget pour l'instant.
+            </Typography>
+          )}
         </Stack>
       </Section>
 
       <Section
         titre={`Catégories (${etat.categories.length})`}
         action={
-          // Texte cliquable plutôt qu'un Button : celui-ci porte 12 px de retrait
-          // vertical dans le thème, ce qui étirait la ligne de titre et désalignait
-          // cette section des autres.
-          <Typography
-            component="button"
-            variant="libelle"
-            onClick={() => setEditionCategories((e) => !e)}
-            sx={{
-              background: 'none',
-              border: 'none',
-              p: 0,
-              cursor: 'pointer',
-              color: COULEURS.bleuClair,
-              fontFamily: 'inherit',
-            }}
-          >
+          <ActionTexte onClick={() => setEditionCategories((e) => !e)}>
             {editionCategories ? 'Terminer' : 'Modifier'}
-          </Typography>
+          </ActionTexte>
         }
       >
         <Carte sx={{ p: 1.75 }}>
@@ -414,21 +494,6 @@ export function Reglages() {
         ouverte={feuilleOuverte}
         onFermer={() => setFeuilleOuverte(false)}
         compte={compteEdite}
-      />
-
-      <DialogueConfirmation
-        ouvert={compteASupprimer !== null}
-        titre="Supprimer ce compte ?"
-        message={
-          compteASupprimer
-            ? `« ${compteASupprimer.nom} » sera effacé, ainsi que ses ${compteASupprimer.charges.length} charge(s) et ${compteASupprimer.budgets.length} budget(s). Le total à virer chaque mois diminuera de ${formatEuros(compteASupprimer.virementPermanentCents)}.`
-            : ''
-        }
-        onConfirmer={() => {
-          if (compteASupprimer) supprimerCompte.mutate(compteASupprimer.id)
-          setCompteASupprimer(null)
-        }}
-        onAnnuler={() => setCompteASupprimer(null)}
       />
 
 

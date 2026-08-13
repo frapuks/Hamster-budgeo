@@ -49,6 +49,8 @@ export interface Budget {
   compteId: number
   nom: string
   montantMensuelCents: number
+  /** Rang d'affichage à l'échelle du foyer, tous comptes confondus. */
+  ordre: number
   categorie: Categorie | null
   depenses: Depense[]
 }
