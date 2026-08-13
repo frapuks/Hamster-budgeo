@@ -16,17 +16,14 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { useParams } from 'react-router-dom'
-import { coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { TypeCharge } from '@hamsterbudgeo/shared/types.js'
-import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { PaveNumerique } from '../components/PaveNumerique.js'
 import { SelecteurCategorie } from '../components/SelecteurCategorie.js'
 import { useEcrireCharge } from '../hooks/useCharges.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
-import { COULEURS } from '../theme.js'
 
 export function FormulaireCharge() {
   const { id } = useParams<{ id: string }>()
@@ -48,7 +45,7 @@ export function FormulaireCharge() {
   const [categorieId, setCategorieId] = useState<number | null>(
     () => chargeExistante?.categorie?.id ?? null,
   )
-  const [jour, setJour] = useState(() => chargeExistante?.jourPrelevement ?? 1)
+  const [jour, setJour] = useState(() => chargeExistante?.jourPrelevement ?? 15)
 
   if (isPending) {
     return (
@@ -85,7 +82,6 @@ export function FormulaireCharge() {
   }
 
   const enCours = creer.isPending || modifier.isPending
-  const lisse = coutMensuelLisse({ type, montantCents })
 
   return (
     <Stack spacing={2.5} sx={{ pb: 2 }}>
@@ -120,7 +116,7 @@ export function FormulaireCharge() {
             color: type === 'annuelle' ? '#FFC46B' : 'text.secondary',
           }}
         >
-          {type === 'annuelle' ? 'par an — montant total sur l’année' : 'par mois'}
+          {type === 'annuelle' ? 'par an' : 'par mois'}
         </Typography>
       </Box>
 
@@ -164,20 +160,9 @@ export function FormulaireCharge() {
             <IconButton onClick={() => setJour((j) => Math.min(31, j + 1))} aria-label="Jour suivant">
               <AddRoundedIcon />
             </IconButton>
-            <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-              sert uniquement à ordonner la liste
-            </Typography>
           </Stack>
         </Box>
       )}
-
-      <Carte sx={{ borderLeft: `3px solid ${COULEURS.bleu}` }}>
-        <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
-          {type === 'annuelle'
-            ? `Provision de ${formatEuros(lisse)}/mois — c'est ce montant qui s'ajoute au virement permanent du compte.`
-            : `${formatEuros(montantCents)}/mois s'ajoutent au virement permanent du compte.`}
-        </Typography>
-      </Carte>
 
       <Button variant="contained" fullWidth disabled={!valide || enCours} onClick={enregistrer}>
         {enCours ? 'Enregistrement…' : 'Enregistrer'}

@@ -16,13 +16,11 @@ import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { useParams } from 'react-router-dom'
 import { api, type SaisieBudget } from '../api/client.js'
-import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { PaveNumerique } from '../components/PaveNumerique.js'
 import { SelecteurCategorie } from '../components/SelecteurCategorie.js'
 import { CLE_ETAT, useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
-import { COULEURS } from '../theme.js'
 
 export function FormulaireBudget() {
   const { id } = useParams<{ id: string }>()
@@ -110,7 +108,7 @@ export function FormulaireBudget() {
           {formatEuros(montantCents)}
         </Typography>
         <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600 }}>
-          par mois — enveloppe à dépenser
+          par mois
         </Typography>
       </Box>
 
@@ -143,13 +141,6 @@ export function FormulaireBudget() {
         valeur={categorieId}
         onChange={setCategorieId}
       />
-
-      <Carte sx={{ borderLeft: `3px solid ${COULEURS.bleu}` }}>
-        <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
-          {formatEuros(montantCents)}/mois s'ajoutent au virement permanent du compte. Un
-          budget non dépensé n'est pas reporté au cycle suivant.
-        </Typography>
-      </Carte>
 
       <Button variant="contained" fullWidth disabled={!valide || enCours} onClick={enregistrer}>
         {enCours ? 'Enregistrement…' : 'Enregistrer'}
