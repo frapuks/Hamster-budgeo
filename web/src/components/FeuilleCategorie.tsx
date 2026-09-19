@@ -6,6 +6,7 @@ import { api } from '../api/client.js'
 import { CLE_ETAT } from '../hooks/useEtat.js'
 import { iconeDe, NOMS_ICONES } from '../icones.js'
 import { COULEURS, RAYONS } from '../theme.js'
+import { PoigneeFeuille } from './PoigneeFeuille.js'
 import { COULEURS_CATEGORIE, TuileCategorie, type CouleurCategorie } from './TuileCategorie.js'
 
 const COULEURS_DISPONIBLES = Object.keys(COULEURS_CATEGORIE) as CouleurCategorie[]
@@ -77,15 +78,7 @@ export function FeuilleCategorie({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 4,
-            borderRadius: '999px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            mx: 'auto',
-          }}
-        />
+        <PoigneeFeuille onFermer={onFermer} />
 
         {/* Aperçu : l'icône et la couleur choisies, telles qu'elles apparaîtront. */}
         <Stack direction="row" alignItems="center" spacing={1.5} justifyContent="center">

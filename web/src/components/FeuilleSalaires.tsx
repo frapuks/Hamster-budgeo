@@ -63,7 +63,7 @@ export function FeuilleSalaires({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <PoigneeFeuille titre="Modifier les salaires" />
+        <PoigneeFeuille titre="Modifier les salaires" onFermer={onFermer} />
 
         {personnes.map((personne, i) => (
           <TextField

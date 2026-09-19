@@ -76,7 +76,10 @@ export function FeuilleCompte({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <PoigneeFeuille titre={compte ? 'Modifier le compte' : 'Nouveau compte'} />
+        <PoigneeFeuille
+          titre={compte ? 'Modifier le compte' : 'Nouveau compte'}
+          onFermer={onFermer}
+        />
 
         <TextField
           label="Nom"

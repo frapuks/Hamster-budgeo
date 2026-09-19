@@ -4,6 +4,7 @@ import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { BudgetCalcule } from '@hamsterbudgeo/shared/types.js'
 import { useAjouterDepense } from '../hooks/useDepenses.js'
 import { PaveNumerique } from './PaveNumerique.js'
+import { PoigneeFeuille } from './PoigneeFeuille.js'
 import { TuileCategorie } from './TuileCategorie.js'
 import { couleurDe, iconeDe } from '../icones.js'
 
@@ -47,15 +48,7 @@ export function FeuilleDepense({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 4,
-            borderRadius: '999px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            mx: 'auto',
-          }}
-        />
+        <PoigneeFeuille onFermer={onFermer} />
 
         <Stack direction="row" alignItems="center" spacing={1.25} justifyContent="center">
           <TuileCategorie

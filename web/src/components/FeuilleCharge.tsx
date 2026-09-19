@@ -78,7 +78,10 @@ export function FeuilleCharge({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3, maxHeight: '88dvh', overflowY: 'auto' }}>
-        <PoigneeFeuille titre={charge ? 'Modifier la charge' : 'Nouvelle charge'} />
+        <PoigneeFeuille
+          titre={charge ? 'Modifier la charge' : 'Nouvelle charge'}
+          onFermer={onFermer}
+        />
 
         <ToggleButtonGroup
           exclusive
