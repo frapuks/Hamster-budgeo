@@ -16,9 +16,13 @@ import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded'
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded'
-import { useNavigate } from 'react-router-dom'
 import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
-import type { Categorie, CompteCalcule, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
+import type {
+  BudgetCalcule,
+  Categorie,
+  CompteCalcule,
+  EtatFoyer,
+} from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
 import { BoutonAjouter } from '../components/BoutonAjouter.js'
 import { BoutonEdition } from '../components/BoutonEdition.js'
@@ -26,6 +30,7 @@ import { Carte } from '../components/Carte.js'
 import { Section } from '../components/Section.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleCategorie } from '../components/FeuilleCategorie.js'
+import { FeuilleBudget } from '../components/FeuilleBudget.js'
 import { FeuilleCompte } from '../components/FeuilleCompte.js'
 import { FeuilleNouveauCycle } from '../components/FeuilleNouveauCycle.js'
 import { TuileCategorie, COULEURS_CATEGORIE, type CouleurCategorie } from '../components/TuileCategorie.js'
@@ -40,12 +45,13 @@ const NOMS_ROLE: Record<string, string> = {
 }
 
 export function Reglages() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: etat, isPending, isError } = useEtat()
 
   const [compteEdite, setCompteEdite] = useState<CompteCalcule | undefined>()
   const [feuilleOuverte, setFeuilleOuverte] = useState(false)
+  const [budgetEdite, setBudgetEdite] = useState<BudgetCalcule | undefined>()
+  const [feuilleBudget, setFeuilleBudget] = useState(false)
   const [cycleOuvert, setCycleOuvert] = useState(false)
   const [categorieOuverte, setCategorieOuverte] = useState(false)
   const [categorieASupprimer, setCategorieASupprimer] = useState<Categorie | null>(null)
@@ -128,6 +134,11 @@ export function Reglages() {
     setFeuilleOuverte(true)
   }
 
+  const ouvrirBudget = (budget?: BudgetCalcule) => {
+    setBudgetEdite(budget)
+    setFeuilleBudget(true)
+  }
+
   return (
     <Stack spacing={3} sx={{ pb: 2 }}>
       <Typography variant="titreSection">Réglages</Typography>
@@ -195,7 +206,7 @@ export function Reglages() {
 
       <Section
         titre="Budgets"
-        action={<BoutonAjouter label="Ajouter un budget" onClick={() => navigate('/budgets/nouveau')} />}
+        action={<BoutonAjouter label="Ajouter un budget" onClick={() => ouvrirBudget()} />}
       >
         <Stack spacing={1.25}>
           {budgets.map((budget, index) => (
@@ -242,7 +253,7 @@ export function Reglages() {
                 <IconButton
                   size="small"
                   aria-label={`Modifier ${budget.nom}`}
-                  onClick={() => navigate(`/budgets/${budget.id}/modifier`)}
+                  onClick={() => ouvrirBudget(budget)}
                 >
                   <EditRoundedIcon fontSize="small" />
                 </IconButton>
@@ -425,6 +436,12 @@ export function Reglages() {
         ouverte={feuilleOuverte}
         onFermer={() => setFeuilleOuverte(false)}
         compte={compteEdite}
+      />
+
+      <FeuilleBudget
+        ouverte={feuilleBudget}
+        onFermer={() => setFeuilleBudget(false)}
+        budget={budgetEdite}
       />
 
 

@@ -12,11 +12,12 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
 import { AnneauProgression } from '../components/AnneauProgression.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
+import { FeuilleBudget } from '../components/FeuilleBudget.js'
 import { FeuilleDepense } from '../components/FeuilleDepense.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
@@ -27,11 +28,11 @@ import { COULEURS } from '../theme.js'
 
 export function DetailBudget() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const retour = useRetour('/')
   const { data: etat, isPending, isError } = useEtat()
   const supprimer = useSupprimerDepense()
   const [saisieOuverte, setSaisieOuverte] = useState(false)
+  const [feuilleOuverte, setFeuilleOuverte] = useState(false)
   const [aSupprimer, setASupprimer] = useState<{ id: number; libelle: string } | null>(null)
 
   if (isPending) {
@@ -72,10 +73,7 @@ export function DetailBudget() {
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
           {budget.nom}
         </Typography>
-        <IconButton
-          aria-label="Modifier le budget"
-          onClick={() => navigate(`/budgets/${budget.id}/modifier`)}
-        >
+        <IconButton aria-label="Modifier le budget" onClick={() => setFeuilleOuverte(true)}>
           <EditRoundedIcon />
         </IconButton>
       </Stack>
@@ -152,6 +150,14 @@ export function DetailBudget() {
           setASupprimer(null)
         }}
         onAnnuler={() => setASupprimer(null)}
+      />
+
+      {/* Le budget supprimé, cet écran n'a plus rien à montrer : on le quitte. */}
+      <FeuilleBudget
+        ouverte={feuilleOuverte}
+        onFermer={() => setFeuilleOuverte(false)}
+        budget={budget}
+        onSupprime={retour}
       />
     </Stack>
   )

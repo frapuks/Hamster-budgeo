@@ -16,6 +16,7 @@ import type { CompteCalcule, EtatFoyer, RoleCompte } from '@hamsterbudgeo/shared
 import { api } from '../api/client.js'
 import { CLE_ETAT } from '../hooks/useEtat.js'
 import { DialogueConfirmation } from './DialogueConfirmation.js'
+import { PoigneeFeuille } from './PoigneeFeuille.js'
 import { COULEURS_CATEGORIE, type CouleurCategorie } from './TuileCategorie.js'
 import { RAYONS } from '../theme.js'
 
@@ -75,18 +76,7 @@ export function FeuilleCompte({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 4,
-            borderRadius: '999px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            mx: 'auto',
-          }}
-        />
-        <Typography variant="libelle" sx={{ textAlign: 'center' }}>
-          {compte ? 'Modifier le compte' : 'Nouveau compte'}
-        </Typography>
+        <PoigneeFeuille titre={compte ? 'Modifier le compte' : 'Nouveau compte'} />
 
         <TextField
           label="Nom"

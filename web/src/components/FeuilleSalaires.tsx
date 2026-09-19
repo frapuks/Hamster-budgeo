@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Box, Button, Drawer, Stack, TextField, Typography } from '@mui/material'
+import { Button, Drawer, Stack, TextField, Typography } from '@mui/material'
+import { PoigneeFeuille } from './PoigneeFeuille.js'
 import type { EtatFoyer, Personne } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { CLE_ETAT } from '../hooks/useEtat.js'
@@ -62,18 +63,7 @@ export function FeuilleSalaires({
   return (
     <Drawer anchor="bottom" open={ouverte} onClose={onFermer}>
       <Stack spacing={2} sx={{ p: 2.5, pb: 3 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 4,
-            borderRadius: '999px',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            mx: 'auto',
-          }}
-        />
-        <Typography variant="libelle" sx={{ textAlign: 'center' }}>
-          Modifier les salaires
-        </Typography>
+        <PoigneeFeuille titre="Modifier les salaires" />
 
         {personnes.map((personne, i) => (
           <TextField

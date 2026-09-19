@@ -10,8 +10,6 @@ import { Connexion } from './pages/Connexion.js'
 import { Demo } from './pages/Demo.js'
 import { DetailBudget } from './pages/DetailBudget.js'
 import { DetailCompte } from './pages/DetailCompte.js'
-import { FormulaireBudget } from './pages/FormulaireBudget.js'
-import { FormulaireCharge } from './pages/FormulaireCharge.js'
 import { Reglages } from './pages/Reglages.js'
 import { LARGEUR_MOBILE } from './theme.js'
 
@@ -71,14 +69,9 @@ export function App() {
         <Route path="/" element={<Accueil />} />
         <Route path="/comptes/:id" element={<DetailCompte />} />
         <Route path="/charges" element={<Charges />} />
-        {/* Chemins littéraux avant la route paramétrée, sinon `:id` capte le mot. */}
-        <Route path="/charges/nouvelle" element={<FormulaireCharge />} />
-        <Route path="/charges/:id" element={<FormulaireCharge />} />
         {/* L'ancien onglet Budgets vit désormais dans l'accueil : on redirige plutôt
             que de laisser un écran vide aux marque-pages et à l'app installée. */}
         <Route path="/budgets" element={<Navigate to="/" replace />} />
-        <Route path="/budgets/nouveau" element={<FormulaireBudget />} />
-        <Route path="/budgets/:id/modifier" element={<FormulaireBudget />} />
         <Route path="/budgets/:id" element={<DetailBudget />} />
         <Route path="/couple" element={<Couple />} />
         <Route path="/reglages" element={<Reglages />} />

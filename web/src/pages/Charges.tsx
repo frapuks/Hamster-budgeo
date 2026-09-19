@@ -10,12 +10,12 @@ import {
   Typography,
 } from '@mui/material'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
-import { useNavigate } from 'react-router-dom'
 import { coutAnnuel, coutMensuelLisse } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { ChargeCalculee, CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { BoutonAjouter } from '../components/BoutonAjouter.js'
 import { Carte } from '../components/Carte.js'
+import { FeuilleCharge } from '../components/FeuilleCharge.js'
 import { PuceType } from '../components/PuceType.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
@@ -106,12 +106,18 @@ function LigneChargeListe({ charge, onClick }: { charge: ChargeCalculee; onClick
 }
 
 export function Charges() {
-  const navigate = useNavigate()
   const { data: etat, isPending, isError } = useEtat()
   const [axe, setAxe] = useState<Groupement>('type')
+  const [chargeEditee, setChargeEditee] = useState<ChargeCalculee | undefined>()
+  const [feuilleOuverte, setFeuilleOuverte] = useState(false)
   // Les groupes repliés, par clé. Tout est déplié au départ : masquer par défaut
   // ferait passer des charges inaperçues.
   const [replies, setReplies] = useState<Set<string>>(new Set())
+
+  const ouvrirFeuille = (charge?: ChargeCalculee) => {
+    setChargeEditee(charge)
+    setFeuilleOuverte(true)
+  }
 
   const basculer = (cle: string) =>
     setReplies((actuelles) => {
@@ -143,7 +149,7 @@ export function Charges() {
     <Stack spacing={2.5} sx={{ pb: 2 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
         <Typography variant="titreSection">Mes charges</Typography>
-        <BoutonAjouter label="Ajouter une charge" onClick={() => navigate('/charges/nouvelle')} />
+        <BoutonAjouter label="Ajouter une charge" onClick={() => ouvrirFeuille()} />
       </Stack>
 
       <Stack direction="row" divider={<Divider orientation="vertical" flexItem />}>
@@ -208,7 +214,7 @@ export function Charges() {
                   <LigneChargeListe
                     key={charge.id}
                     charge={charge}
-                    onClick={() => navigate(`/charges/${charge.id}`)}
+                    onClick={() => ouvrirFeuille(charge)}
                   />
                 ))}
               </Stack>
@@ -222,6 +228,12 @@ export function Charges() {
           Aucune charge enregistrée.
         </Typography>
       )}
+
+      <FeuilleCharge
+        ouverte={feuilleOuverte}
+        onFermer={() => setFeuilleOuverte(false)}
+        charge={chargeEditee}
+      />
     </Stack>
   )
 }
