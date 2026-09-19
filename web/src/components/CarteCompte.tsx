@@ -2,7 +2,7 @@ import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { CompteCalcule } from '@hamsterbudgeo/shared/types.js'
-import { proportionRestante } from '../proportions.js'
+import { proportionCompte } from '../proportions.js'
 import { COULEURS_CATEGORIE, type CouleurCategorie } from './TuileCategorie.js'
 import { Carte } from './Carte.js'
 
@@ -46,7 +46,7 @@ function chiffreDuCompte(compte: CompteCalcule): {
 
 export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClick?: () => void }) {
   const { montantCents, libelle, detail } = chiffreDuCompte(compte)
-  const progression = proportionRestante(compte.resteASortirCents, compte.totalDuCycleCents)
+  const progression = proportionCompte(compte)
 
   const pastille =
     COULEURS_CATEGORIE[(compte.couleur as CouleurCategorie) in COULEURS_CATEGORIE

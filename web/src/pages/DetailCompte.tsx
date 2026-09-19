@@ -23,7 +23,7 @@ import { VueProvisions } from '../components/VueProvisions.js'
 import { useCocherCharge } from '../hooks/useCocherCharge.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
-import { proportionRestante } from '../proportions.js'
+import { proportionCompte } from '../proportions.js'
 
 /** En-tête commun aux deux vues d'un compte. */
 function EnTeteCompte({ compte, onRetour }: { compte: CompteCalcule; onRetour: () => void }) {
@@ -91,14 +91,19 @@ export function DetailCompte() {
 
   const mensuelles = compte.charges.filter((c) => c.type === 'mensuelle')
   const cochees = mensuelles.filter((c) => c.estPrelevee).length
-  const progression = proportionRestante(compte.resteASortirCents, compte.totalDuCycleCents)
+  const progression = proportionCompte(compte)
 
   // Un compte porte des budgets (rôle `courant`) ou n'en porte pas (rôle
   // `prelevements`). C'est cette présence, et non le rôle déclaré, qui décide de
   // l'affichage : un compte de prélèvements auquel on ajouterait un budget se
   // comporterait correctement sans code supplémentaire.
   const mixte = compte.budgets.length > 0
-  const ongletActif = mixte ? onglet : 'charges'
+
+  // Le sélecteur ne sert que s'il y a deux choses entre lesquelles choisir. Avec un
+  // seul des deux, il proposerait un onglet vide : on affiche directement ce que le
+  // compte porte.
+  const selecteur = mensuelles.length > 0 && mixte
+  const ongletActif = selecteur ? onglet : mixte ? 'budgets' : 'charges'
 
   return (
     <Stack spacing={3} sx={{ pb: 2 }}>
@@ -149,7 +154,7 @@ export function DetailCompte() {
         />
       </Box>
 
-      {mixte && (
+      {selecteur && (
         <ToggleButtonGroup
           exclusive
           fullWidth
