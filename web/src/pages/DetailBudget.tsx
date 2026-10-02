@@ -19,6 +19,7 @@ import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
 import { FeuilleBudget } from '../components/FeuilleBudget.js'
 import { FeuilleDepense } from '../components/FeuilleDepense.js'
+import { HistoriqueBudget } from '../components/HistoriqueBudget.js'
 import { TuileCategorie } from '../components/TuileCategorie.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
@@ -84,7 +85,7 @@ export function DetailBudget() {
           valeur={formatEuros(budget.resteADepenserCents)}
           legende={depasse ? 'de dépassement' : 'restants'}
           taille={200}
-          couleur={depasse ? COULEURS.corail : COULEURS.bleuClair}
+          couleur={depasse ? COULEURS.corail : COULEURS.vert}
         />
         <Typography variant="body2" sx={{ mt: 1.5 }}>
           {formatEuros(budget.depenseCents)} dépensés sur {formatEuros(budget.montantMensuelCents)}
@@ -94,6 +95,13 @@ export function DetailBudget() {
       <Button variant="contained" fullWidth startIcon={<AddRoundedIcon />} onClick={() => setSaisieOuverte(true)}>
         Ajouter une dépense
       </Button>
+
+      <Box>
+        <Typography variant="titreSection" sx={{ mb: 1.5 }}>
+          Mois précédents
+        </Typography>
+        <HistoriqueBudget budgetId={budget.id} />
+      </Box>
 
       <Box>
         <Stack direction="row" alignItems="baseline" justifyContent="space-between" sx={{ mb: 1.5 }}>

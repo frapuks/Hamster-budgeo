@@ -320,3 +320,20 @@ export function repartir(
     resteAVivreCents: p.salaireNetCents - parts[i]!,
   }))
 }
+
+/**
+ * Mois auquel rattacher un cycle : celui qui contient son milieu.
+ *
+ * Le reset n'arrive jamais pile à la frontière. Fait le 31 août au soir, le mois du
+ * début donnerait « août » ; fait le 1er octobre, le mois de la fin donnerait
+ * « octobre ». Le milieu tombe juste dans les deux cas, sans seuil arbitraire.
+ *
+ * Les dates sont en `YYYY-MM-DD` et le résultat est le premier jour du mois retenu.
+ * Tout est calculé en UTC : un fuseau négatif reculerait d'un jour et pourrait, au pire,
+ * changer le mois.
+ */
+export function moisDuCycle(debut: string, fin: string): string {
+  const milieu = new Date((Date.parse(`${debut}T00:00:00Z`) + Date.parse(`${fin}T00:00:00Z`)) / 2)
+  const mois = String(milieu.getUTCMonth() + 1).padStart(2, '0')
+  return `${milieu.getUTCFullYear()}-${mois}-01`
+}

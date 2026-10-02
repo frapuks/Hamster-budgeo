@@ -1,6 +1,7 @@
 import type {
   Contribution,
   EtatFoyer,
+  HistoriqueBudget,
   ModeRepartition,
   RoleCompte,
   Sante,
@@ -122,7 +123,11 @@ export const api = {
   supprimerBudget: (id: number) => envoyer<EtatFoyer>('DELETE', `/api/budgets/${id}`),
   reordonnerBudgets: (ids: number[]) => envoyer<EtatFoyer>('POST', '/api/budgets/ordre', { ids }),
 
-  demarrerNouveauCycle: () => envoyer<EtatFoyer>('POST', '/api/cycle/reset'),
+  /** `mois` force le mois de rattachement du cycle archivé. */
+  demarrerNouveauCycle: (mois?: string) =>
+    envoyer<EtatFoyer>('POST', '/api/cycle/reset', mois ? { mois } : {}),
+
+  getHistoriqueBudget: (id: number) => get<HistoriqueBudget>(`/api/budgets/${id}/historique`),
 
   modifierSalaire: (personneId: number, salaireNetCents: number) =>
     patch<EtatFoyer>(`/api/personnes/${personneId}/salaire`, { salaireNetCents }),

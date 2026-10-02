@@ -3,6 +3,7 @@ import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { BudgetCalcule } from '@hamsterbudgeo/shared/types.js'
 import { couleurDe, iconeDe } from '../icones.js'
 import { proportionRestante } from '../proportions.js'
+import { COULEURS } from '../theme.js'
 import { TuileCategorie } from './TuileCategorie.js'
 import { Carte } from './Carte.js'
 
@@ -32,7 +33,7 @@ export function LigneBudget({ budget, onClick }: { budget: BudgetCalcule; onClic
         <Stack alignItems="flex-end">
           <Typography
             variant="montantCarte"
-            sx={{ fontSize: '1.25rem', color: depasse ? 'error.main' : 'bleuClair' }}
+            sx={{ fontSize: '1.25rem', color: depasse ? COULEURS.corail : COULEURS.vert }}
           >
             {formatEuros(budget.resteADepenserCents)}
           </Typography>
@@ -46,10 +47,17 @@ export function LigneBudget({ budget, onClick }: { budget: BudgetCalcule; onClic
           )}
         </Stack>
       </Stack>
+      {/* Même vert que la jauge des budgets de l'accueil : la couleur dit la nature de
+          l'argent suivi, pas l'écran où on se trouve. Le dépassement garde le corail,
+          qui prime sur cette convention. */}
       <LinearProgress
         variant="determinate"
         value={proportion}
-        color={depasse ? 'error' : 'secondary'}
+        sx={{
+          '& .MuiLinearProgress-bar': {
+            backgroundColor: depasse ? COULEURS.corail : COULEURS.vert,
+          },
+        }}
       />
     </Carte>
   )

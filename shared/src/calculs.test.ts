@@ -4,6 +4,7 @@ import {
   bilanCouple,
   coutAnnuel,
   deltaCompte,
+  moisDuCycle,
   repartirSurComptes,
   verseSurCompte,
   coutMensuelLisse,
@@ -397,5 +398,33 @@ describe('bilanCouple', () => {
     expect(bilan!.partDuSalaire).toBe(0)
     expect(bilan!.partDesCharges).toBe(0)
     expect(bilan!.resteAVivreCents).toBe(0)
+  })
+})
+
+
+describe('moisDuCycle', () => {
+  it('rattache à septembre un cycle clos le 1er octobre', () => {
+    expect(moisDuCycle('2026-09-02', '2026-10-01')).toBe('2026-09-01')
+  })
+
+  it('rattache à septembre un cycle ouvert le 31 août au soir', () => {
+    // Le mois du début aurait répondu « août », celui de la fin « octobre ».
+    expect(moisDuCycle('2026-08-31', '2026-10-01')).toBe('2026-09-01')
+  })
+
+  it('rattache à septembre un cycle entièrement contenu dans le mois', () => {
+    expect(moisDuCycle('2026-09-02', '2026-09-30')).toBe('2026-09-01')
+  })
+
+  it('traverse correctement un changement d’année', () => {
+    expect(moisDuCycle('2026-11-30', '2027-01-02')).toBe('2026-12-01')
+  })
+
+  it('gère un cycle d’un seul jour', () => {
+    expect(moisDuCycle('2026-09-15', '2026-09-15')).toBe('2026-09-01')
+  })
+
+  it('tranche sur une année bissextile', () => {
+    expect(moisDuCycle('2028-01-31', '2028-03-01')).toBe('2028-02-01')
   })
 })

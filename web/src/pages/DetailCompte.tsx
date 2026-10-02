@@ -17,6 +17,7 @@ import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { useNavigate, useParams } from 'react-router-dom'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { CompteCalcule } from '@hamsterbudgeo/shared/types.js'
+import { JaugeMixte } from '../components/JaugeMixte.js'
 import { LigneBudget } from '../components/LigneBudget.js'
 import { LigneCharge } from '../components/LigneCharge.js'
 import { VueProvisions } from '../components/VueProvisions.js'
@@ -24,6 +25,7 @@ import { useCocherCharge } from '../hooks/useCocherCharge.js'
 import { useEtat } from '../hooks/useEtat.js'
 import { useRetour } from '../hooks/useRetour.js'
 import { proportionCompte } from '../proportions.js'
+import { COULEURS } from '../theme.js'
 
 /** En-tête commun aux deux vues d'un compte. */
 function EnTeteCompte({ compte, onRetour }: { compte: CompteCalcule; onRetour: () => void }) {
@@ -92,6 +94,7 @@ export function DetailCompte() {
   const mensuelles = compte.charges.filter((c) => c.type === 'mensuelle')
   const cochees = mensuelles.filter((c) => c.estPrelevee).length
   const progression = proportionCompte(compte)
+  const budgeteCents = compte.budgets.reduce((s, b) => s + b.montantMensuelCents, 0)
 
   // Un compte porte des budgets (rôle `courant`) ou n'en porte pas (rôle
   // `prelevements`). C'est cette présence, et non le rôle déclaré, qui décide de
@@ -122,8 +125,16 @@ export function DetailCompte() {
           // d'argent qui ne se suivent pas de la même façon, l'une se coche, l'autre
           // se décrémente. Sans cette ligne, le total paraîtrait sorti de nulle part.
           <Typography variant="body2" sx={{ mt: 0.75 }}>
-            {formatEuros(compte.resteASortirCents)} de charges +{' '}
-            {formatEuros(compte.resteADepenserCents)} de budgets
+            {/* Chaque montant porte la couleur de son segment dans la jauge : c'est ce
+                qui tient lieu de légende. */}
+            <Box component="span" sx={{ color: COULEURS.bleuClair, fontWeight: 600 }}>
+              {formatEuros(compte.resteASortirCents)}
+            </Box>{' '}
+            de charges +{' '}
+            <Box component="span" sx={{ color: COULEURS.vert, fontWeight: 600 }}>
+              {formatEuros(compte.resteADepenserCents)}
+            </Box>{' '}
+            de budgets
           </Typography>
         ) : (
           <Stack
@@ -139,19 +150,20 @@ export function DetailCompte() {
           </Stack>
         )}
 
-        <LinearProgress
-          variant="determinate"
-          value={progression}
-          color="secondary"
-          sx={{ mt: 2 }}
-        />
+        {/* Deux segments dès que le compte porte les deux natures ; une seule barre
+            sinon, un segment vide n'apprendrait rien. */}
+        <Box sx={{ mt: 2 }}>
+          {mixte ? (
+            <JaugeMixte
+              chargesCents={compte.resteASortirCents}
+              budgetsCents={compte.resteADepenserCents}
+              totalCents={compte.totalDuCycleCents + budgeteCents}
+            />
+          ) : (
+            <LinearProgress variant="determinate" value={progression} color="secondary" />
+          )}
+        </Box>
 
-        <Chip
-          size="small"
-          icon={<AutorenewRoundedIcon sx={{ fontSize: 15 }} />}
-          label={`Virement permanent ${formatEuros(compte.virementPermanentCents)}/mois`}
-          sx={{ mt: 2 }}
-        />
       </Box>
 
       {selecteur && (

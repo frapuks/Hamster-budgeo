@@ -1,5 +1,4 @@
-import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material'
-import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
+import { Box, LinearProgress, Stack, Typography } from '@mui/material'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { CompteCalcule } from '@hamsterbudgeo/shared/types.js'
 import { proportionCompte } from '../proportions.js'
@@ -94,15 +93,6 @@ export function CarteCompte({ compte, onClick }: { compte: CompteCalcule; onClic
         />
       )}
 
-      {/* Sur le compte de provisions, le virement EST déjà le montant affiché. */}
-      {compte.role !== 'provisions' && (
-        <Chip
-          size="small"
-          icon={<AutorenewRoundedIcon sx={{ fontSize: 15 }} />}
-          label={`Virement ${formatEuros(compte.virementPermanentCents)}/mois`}
-          sx={{ mt: 1.5 }}
-        />
-      )}
     </Carte>
   )
 }

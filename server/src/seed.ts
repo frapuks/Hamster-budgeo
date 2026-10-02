@@ -106,7 +106,50 @@ const BUDGETS = [
   depenses: { libelle: string; cents: number; jour: number }[]
 }[]
 
-const DEBUT_CYCLE = '2025-07-01'
+/**
+ * Trois mois clos avant le cycle courant, pour que l'historique d'un budget ait quelque
+ * chose à montrer dès le chargement de la démo.
+ *
+ * Les totaux sont choisis pour illustrer les trois cas : un budget régulier, un budget
+ * irrégulier, et un dépassement. Le détail des lignes est reconstitué par découpage du
+ * total, à l'identique d'un chargement à l'autre.
+ */
+/**
+ * Les mois de la démo sont relatifs au jour du chargement, pas figés dans le code.
+ *
+ * L'écran d'un budget n'affiche que les six derniers mois. Des dates en dur auraient
+ * fini hors de cette fenêtre, et la démo se serait chargée avec un historique vide.
+ */
+function premierDuMois(decalage: number): string {
+  const d = new Date()
+  const m = new Date(Date.UTC(d.getFullYear(), d.getMonth() + decalage, 1))
+  return `${m.getUTCFullYear()}-${String(m.getUTCMonth() + 1).padStart(2, '0')}-01`
+}
+
+const MOIS_ARCHIVES = [premierDuMois(-3), premierDuMois(-2), premierDuMois(-1)]
+
+const HISTORIQUE: Record<string, number[]> = {
+  Courses: [33120, 36450, 31890],
+  Essence: [28740, 30010, 29360],
+  Restaurants: [12450, 19870, 15230],
+  Loisirs: [8600, 4250, 9980],
+}
+
+/** Découpe un total en trois lignes datées, sans jamais perdre un centime. */
+function lignesArchivees(total: number, mois: string, libelles: string[]) {
+  const parts = [Math.round(total * 0.4), Math.round(total * 0.35)]
+  parts.push(total - parts[0]! - parts[1]!)
+  const jours = ['05', '12', '22']
+
+  return parts.map((cents, i) => ({
+    libelle: libelles[i % libelles.length]!,
+    montant_cents: cents,
+    date_depense: `${mois.slice(0, 8)}${jours[i]}`,
+  }))
+}
+
+/** Le cycle courant de la démo est le mois en cours. */
+const DEBUT_CYCLE = premierDuMois(0)
 const SALAIRES = [240000, 190000]
 
 /**
@@ -118,7 +161,7 @@ const SALAIRES = [240000, 190000]
 export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }> {
   return sql.begin(async (tx) => {
     if (foyerIdCible === undefined) {
-      await tx`TRUNCATE depense, budget, charge, compte, categorie, invitation, session, utilisateur, personne, foyer RESTART IDENTITY CASCADE`
+      await tx`TRUNCATE depense_archive, budget_archive, cycle_archive, contribution, depense, budget, charge, compte, categorie, invitation, session, utilisateur, personne, foyer RESTART IDENTITY CASCADE`
     }
 
     let foyerId: number
@@ -140,6 +183,7 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
       foyerId = foyerIdCible
       await tx`DELETE FROM compte WHERE foyer_id = ${foyerId}`
       await tx`DELETE FROM categorie WHERE foyer_id = ${foyerId}`
+      await tx`DELETE FROM cycle_archive WHERE foyer_id = ${foyerId}`
       await tx`
         UPDATE foyer SET mode_repartition = 'prorata_revenus', dernier_reset = ${DEBUT_CYCLE}
         WHERE id = ${foyerId}
@@ -206,12 +250,42 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
     ]
     await tx`INSERT INTO charge ${tx(lignesCharges)}`
 
+    // Un cycle archivé par mois, les budgets y seront rattachés juste après.
+    const cycles: { id: number; mois: string }[] = []
+    for (const mois of MOIS_ARCHIVES) {
+      const fin = `${mois.slice(0, 8)}28`
+      const [cycle] = await tx<{ id: number }[]>`
+        INSERT INTO cycle_archive (foyer_id, mois, debut, fin)
+        VALUES (${foyerId}, ${mois}, ${`${mois.slice(0, 8)}01`}, ${fin})
+        RETURNING id
+      `
+      cycles.push({ id: cycle!.id, mois })
+    }
+
     for (const [i, b] of BUDGETS.entries()) {
       const [budget] = await tx<{ id: number }[]>`
         INSERT INTO budget (compte_id, categorie_id, nom, montant_mensuel_cents, ordre)
         VALUES (${idCompte.get('courant')!}, ${idCategorie.get(b.cat)!}, ${b.nom}, ${b.cents}, ${i})
         RETURNING id
       `
+
+      for (const [j, cycle] of cycles.entries()) {
+        const total = HISTORIQUE[b.nom]![j]!
+        const [archive] = await tx<{ id: number }[]>`
+          INSERT INTO budget_archive (cycle_archive_id, budget_id, nom, plafond_cents, depense_cents)
+          VALUES (${cycle.id}, ${budget!.id}, ${b.nom}, ${b.cents}, ${total})
+          RETURNING id
+        `
+        await tx`
+          INSERT INTO depense_archive ${tx(
+            lignesArchivees(
+              total,
+              cycle.mois,
+              b.depenses.map((d) => d.libelle),
+            ).map((l) => ({ ...l, budget_archive_id: archive!.id })),
+          )}
+        `
+      }
       if (b.depenses.length > 0) {
         await tx`
           INSERT INTO depense ${tx(
@@ -220,7 +294,7 @@ export async function semer(foyerIdCible?: number): Promise<{ foyerId: number }>
               personne_id: null,
               libelle: d.libelle,
               montant_cents: d.cents,
-              date_depense: `2025-07-${String(d.jour).padStart(2, '0')}`,
+              date_depense: `${DEBUT_CYCLE.slice(0, 8)}${String(d.jour).padStart(2, '0')}`,
             })),
           )}
         `

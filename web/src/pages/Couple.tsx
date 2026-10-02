@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded'
 import {
   bilanCouple,
   deltaCompte,
@@ -18,13 +18,14 @@ import {
   verseSurCompte,
 } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
-import type { Contribution, EtatFoyer, ModeRepartition } from '@hamsterbudgeo/shared/types.js'
+import type { Contribution, EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api } from '../api/client.js'
 import { BoutonEdition } from '../components/BoutonEdition.js'
 import { FeuilleSalaires } from '../components/FeuilleSalaires.js'
 import { Carte } from '../components/Carte.js'
 import { DialogueConfirmation } from '../components/DialogueConfirmation.js'
-import { CartesModes, NOM_DU_MODE } from '../components/CartesModes.js'
+import { CarteMode, NOM_DU_MODE } from '../components/CartesModes.js'
+import { FeuilleModeRepartition } from '../components/FeuilleModeRepartition.js'
 import { Section } from '../components/Section.js'
 import { useEtat, CLE_ETAT } from '../hooks/useEtat.js'
 import { COULEURS, TEINTES_PERSONNE as TEINTES } from '../theme.js'
@@ -104,16 +105,13 @@ function Resultat({ libelle, valeur }: { libelle: string; valeur: string }) {
 export function Couple() {
   const queryClient = useQueryClient()
   const [feuilleSalaires, setFeuilleSalaires] = useState(false)
+  const [feuilleMode, setFeuilleMode] = useState(false)
   const [confirmationRepartition, setConfirmationRepartition] = useState(false)
   const { data: etat, isPending, isError } = useEtat()
 
   const surSucces = (nouvelEtat: EtatFoyer) => queryClient.setQueryData(CLE_ETAT, nouvelEtat)
   const contributions = useMutation({
     mutationFn: (liste: Contribution[]) => api.enregistrerContributions(liste),
-    onSuccess: surSucces,
-  })
-  const mode = useMutation({
-    mutationFn: (m: ModeRepartition) => api.definirModeRepartition(m),
     onSuccess: surSucces,
   })
 
@@ -176,30 +174,38 @@ export function Couple() {
         </Stack>
       </Section>
 
-      <Section titre="Mode de répartition">
-        <CartesModes
-          personnes={personnes}
-          modeActif={repartition.mode}
-          totalCents={repartition.chargesCommunesCents}
-          onChoisir={(m) => mode.mutate(m)}
-        />
-      </Section>
-
       <Section
-        titre="Virements compte par compte"
+        titre="Mode de répartition"
         action={
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-            disabled={contributions.isPending}
-            onClick={() => setConfirmationRepartition(true)}
-            sx={{ py: 0.5 }}
-          >
-            Répartir
-          </Button>
+          <BoutonEdition
+            labelModifier="Changer le mode de répartition"
+            onClick={() => setFeuilleMode(true)}
+          />
         }
       >
+        <CarteMode
+          mode={repartition.mode}
+          personnes={personnes}
+          totalCents={repartition.chargesCommunesCents}
+        />
+
+        {/* Posé sous la carte du mode plutôt que dans la ligne de titre : c'est la
+            suite logique de lecture, le mode puis son application aux comptes. */}
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<ArrowDownwardRoundedIcon sx={{ fontSize: 15 }} />}
+          disabled={contributions.isPending}
+          onClick={() => setConfirmationRepartition(true)}
+          // Le thème impose 12 px de retrait vertical à tous les boutons, taillés pour
+          // les actions principales. Celui-ci est secondaire et reste sur une ligne.
+          sx={{ mt: 1.25, py: 0.625, fontSize: '0.8125rem' }}
+        >
+          Répartir automatiquement
+        </Button>
+      </Section>
+
+      <Section titre="Virements compte par compte">
         <Stack spacing={1.25}>
           {comptes.map((compte) => (
             <Carte key={compte.id} sx={{ p: 1.75 }}>
@@ -298,6 +304,14 @@ export function Couple() {
         ouverte={feuilleSalaires}
         onFermer={() => setFeuilleSalaires(false)}
         personnes={personnes}
+      />
+
+      <FeuilleModeRepartition
+        ouverte={feuilleMode}
+        onFermer={() => setFeuilleMode(false)}
+        personnes={personnes}
+        modeActif={repartition.mode}
+        totalCents={repartition.chargesCommunesCents}
       />
     </Stack>
   )

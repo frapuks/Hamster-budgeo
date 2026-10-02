@@ -106,6 +106,28 @@ export interface Repartition {
   parts: PartRepartition[]
 }
 
+/**
+ * Un mois clos d'un budget, lu dans l'archive.
+ *
+ * Ne circule pas dans `EtatFoyer` : l'historique est en lecture seule, n'entre dans
+ * aucun calcul courant, et n'a pas à alourdir la charge utile de chaque écran.
+ */
+export interface MoisBudget {
+  /** Premier jour du mois, en `YYYY-MM-DD`. */
+  mois: string
+  debut: string
+  fin: string
+  /** Le nom du budget tel qu'il était à la clôture. */
+  nom: string
+  plafondCents: number
+  depenseCents: number
+}
+
+export interface HistoriqueBudget {
+  budgetId: number
+  mois: MoisBudget[]
+}
+
 /** Ce qu'une personne verse sur un compte donné, tel qu'elle l'a paramétré. */
 export interface Contribution {
   personneId: number

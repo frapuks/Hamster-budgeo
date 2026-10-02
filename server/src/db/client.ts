@@ -13,6 +13,9 @@ export const sql = postgres(url, {
   onnotice: () => {},
 })
 
+/** La poignée passée au bloc de `sql.begin`, pour les fonctions qui s'y greffent. */
+export type Transaction = postgres.TransactionSql
+
 /** Utilisé par /api/health. */
 export async function baseRepond(): Promise<boolean> {
   try {

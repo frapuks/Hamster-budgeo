@@ -1,4 +1,4 @@
-import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import { totalAnnuel } from '@hamsterbudgeo/shared/calculs.js'
 import { formatEuros } from '@hamsterbudgeo/shared/format.js'
@@ -32,12 +32,6 @@ export function VueProvisions({ compte }: { compte: CompteCalcule }) {
         <Typography variant="body2" sx={{ mt: 0.5 }}>
           par mois, pour couvrir {formatEuros(couvertureAnnuelle)} de charges dans l'année
         </Typography>
-        <Chip
-          size="small"
-          icon={<CheckRoundedIcon sx={{ fontSize: 15 }} />}
-          label="Rien à cocher sur ce compte"
-          sx={{ mt: 1.5 }}
-        />
       </Box>
 
       <Box>
@@ -102,10 +96,6 @@ export function VueProvisions({ compte }: { compte: CompteCalcule }) {
           </>
         )}
       </Box>
-
-      <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
-        Cet argent dort sur ton épargne et génère des intérêts jusqu'au prélèvement.
-      </Typography>
     </Stack>
   )
 }

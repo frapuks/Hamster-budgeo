@@ -15,7 +15,7 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { useNavigate } from 'react-router-dom'
-import { formatDate, formatEuros } from '@hamsterbudgeo/shared/format.js'
+import { formatEuros } from '@hamsterbudgeo/shared/format.js'
 import type { EtatFoyer } from '@hamsterbudgeo/shared/types.js'
 import { api, ErreurApi } from '../api/client.js'
 import { CarteCompte } from '../components/CarteCompte.js'
@@ -75,8 +75,9 @@ export function Accueil() {
     )
   }
 
-  const { totaux, comptes, foyer } = etat
+  const { totaux, comptes } = etat
   const progression = proportionRestante(totaux.resteASortirCents, totaux.totalDuCycleCents)
+  const progressionBudgets = proportionRestante(totaux.resteADepenserCents, totaux.budgeteCents)
 
   const budgets = comptes.flatMap((c) => c.budgets).sort((a, b) => a.ordre - b.ordre)
 
@@ -158,12 +159,27 @@ export function Accueil() {
             color="secondary"
             sx={{ mt: 2 }}
           />
+
+          {/* Les trois chiffres des budgets, puis leur jauge : ils la décrivent, et la
+              jauge n'a plus besoin de légende. Les budgets ne se cochent pas, ils se
+              décrémentent — d'où une seconde barre et non un cumul avec les charges,
+              qui masquerait l'un des deux mouvements. */}
+          <Stack
+            direction="row"
+            divider={<Divider orientation="vertical" flexItem />}
+            sx={{ mt: 2.5 }}
+          >
+            <Stat libelle="Budgété" montantCents={totaux.budgeteCents} />
+            <Stat libelle="Dépensé" montantCents={totaux.depenseCents} />
+            <Stat libelle="Restant" montantCents={totaux.resteADepenserCents} />
+          </Stack>
+
+          <LinearProgress
+            variant="determinate"
+            value={progressionBudgets}
+            sx={{ mt: 1.25, '& .MuiLinearProgress-bar': { backgroundColor: COULEURS.vert } }}
+          />
         </Box>
-        <Chip
-          size="small"
-          icon={<AutorenewRoundedIcon sx={{ fontSize: 15 }} />}
-          label={`Dernier reset le ${formatDate(foyer.dernierReset)}`}
-        />
       </Stack>
 
       <Box>
@@ -189,16 +205,6 @@ export function Accueil() {
           </Typography>
         ) : (
           <>
-            <Stack
-              direction="row"
-              divider={<Divider orientation="vertical" flexItem />}
-              sx={{ mb: 2 }}
-            >
-              <Stat libelle="Budgété" montantCents={totaux.budgeteCents} />
-              <Stat libelle="Dépensé" montantCents={totaux.depenseCents} />
-              <Stat libelle="Restant" montantCents={totaux.resteADepenserCents} />
-            </Stack>
-
             <Stack spacing={1.25} sx={{ mb: 1.5 }}>
               {budgets.map((budget) => (
                 <LigneBudget
